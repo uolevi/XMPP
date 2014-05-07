@@ -1,13 +1,11 @@
+
 <?xml version="1.0"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>XEP-xxxx: Two-factor user authentication with a shared secret</title><link rel="stylesheet" type="text/css" href="../xmpp.css" /><link href="../prettify.css" type="text/css" rel="stylesheet" /><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" /><script type="text/javascript" src="../prettify.js"></script><meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=2.0" /><meta name="DC.Title" content="Two-factor user authentication with a shared secret" /><meta name="DC.Creator" content="Teemu V&#xE4;is&#xE4;nen" /><meta name="DC.Description" content="This document specifies a two-factor authentication mechanism.  &#10;  Authentication mechanisms enables checking if a XMPP account exists,&#10;  if it knows verifier's full JID, and if it possess a shared secret &#10;  inside certain device or application inside a certain time-window.&#10;  Authentication is based on transmitting a random string,&#10;  Time-Based One-time Password (TOTP) or One-time pad using ad-hoc commands. &#10;  " /><meta name="DC.Publisher" content="XMPP Standards Foundation" /><meta name="DC.Contributor" content="XMPP Extensions Editor" /><meta name="DC.Date" content="2014-02-04" /><meta name="DC.Type" content="XMPP Extension Protocol" /><meta name="DC.Format" content="XHTML" /><meta name="DC.Identifier" content="XEP-xxxx" /><meta name="DC.Language" content="en" /><meta name="DC.Rights" content="This XMPP Extension Protocol is copyright (c) 1999 - 2013 by the XMPP Standards Foundation (XSF)." /></head><body onload="prettyPrint()"><h1>XEP-xxxx: Two-factor user authentication with a shared secret</h1><table><tr valign="top"><td><strong>Abstract:</strong></td><td>This document specifies a two-factor authentication mechanism.  
-  Authentication mechanisms enables checking if a XMPP account exists,
-  if it knows verifier's full JID, and if it possess a shared secret 
-  inside certain device or application inside a certain time-window.
-  Authentication is based on transmitting a random string,
-  Time-Based One-time Password (TOTP) or One-time pad using ad-hoc commands. 
-  </td></tr><tr valign="top"><td><strong>Author:</strong></td><td>Teemu Väisänen</td></tr><tr valign="top"><td><strong>Copyright:</strong></td><td>© 1999 - 2013 XMPP Standards Foundation. <a href="#appendix-legal">SEE LEGAL NOTICES</a>.</td></tr><tr valign="top"><td><strong>Status:</strong></td><td>ProtoXEP</td></tr><tr valign="top"><td><strong>Type:</strong></td><td>Informational</td></tr><tr valign="top"><td><strong>Version:</strong></td><td>Draft of 0.0.2</td></tr><tr valign="top"><td><strong>Last Updated:</strong></td><td>2014-02-04</td></tr></table><hr /><p style="color:red">WARNING: This document has not yet been accepted for consideration or approved in any official manner by the XMPP Standards Foundation, and this document is not yet an XMPP Extension Protocol (XEP). If this document is accepted as a XEP by the XMPP Council, it will be published at &lt;<a href="http://xmpp.org/extensions/">http://xmpp.org/extensions/</a>&gt; and announced on the &lt;standards@xmpp.org&gt; mailing list.</p><hr /><h2>Table of Contents</h2><div class="indent"><p><br />1.  <a href="#intro">Introduction</a><br />   
-      1.1.  <a href="#example-seq">Simplified example sequence</a><br />2.  <a href="#reqs">Requirements</a><br />3.  <a href="#disco">Discovery</a><br />4.  <a href="#glossary">Glossary</a><br />5.  <a href="#usecases">Use Cases</a><br />   
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>XEP-xxxx: Transmitting authentication factor information using Ad-Hoc Commands</title><link rel="stylesheet" type="text/css" href="../xmpp.css" /><link href="../prettify.css" type="text/css" rel="stylesheet" /><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" /><script type="text/javascript" src="../prettify.js"></script><meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=2.0" /><meta name="DC.Title" content="Transmitting authentication factor information using Ad-Hoc Commands" /><meta name="DC.Creator" content="Teemu V&#xE4;is&#xE4;nen" /><meta name="DC.Description" content="This document specifies how to use Ad-Hoc Commands to transmit &#10;  information used in two-factor authentication. &#10;  " /><meta name="DC.Publisher" content="XMPP Standards Foundation" /><meta name="DC.Contributor" content="XMPP Extensions Editor" /><meta name="DC.Date" content="2014-03-19" /><meta name="DC.Type" content="XMPP Extension Protocol" /><meta name="DC.Format" content="XHTML" /><meta name="DC.Identifier" content="XEP-xxxx" /><meta name="DC.Language" content="en" /><meta name="DC.Rights" content="This XMPP Extension Protocol is copyright (c) 1999 - 2014 by the XMPP Standards Foundation (XSF)." /></head><body onload="prettyPrint()"><h1>XEP-xxxx: Transmitting authentication factor information using Ad-Hoc Commands</h1><table><tr valign="top"><td><strong>Abstract:</strong></td><td>This document specifies how to use Ad-Hoc Commands to transmit 
+  information used in two-factor authentication. 
+  </td></tr><tr valign="top"><td><strong>Author:</strong></td><td>Teemu Väisänen</td></tr><tr valign="top"><td><strong>Copyright:</strong></td><td>© 1999 - 2013 XMPP Standards Foundation. <a href="#appendix-legal">SEE LEGAL NOTICES</a>.</td></tr><tr valign="top"><td><strong>Status:</strong></td><td>ProtoXEP</td></tr><tr valign="top"><td><strong>Type:</strong></td><td>Informational</td></tr><tr valign="top"><td><strong>Version:</strong></td><td>Draft of 0.0.3</td></tr><tr valign="top"><td><strong>Last Updated:</strong></td><td>2014-03-19</td></tr></table><hr /><p style="color:red">WARNING: This document has not yet been accepted for consideration or approved in any official manner by the XMPP Standards Foundation, and this document is not yet an XMPP Extension Protocol (XEP). If this document is accepted as a XEP by the XMPP Council, it will be published at &lt;<a href="http://xmpp.org/extensions/">http://xmpp.org/extensions/</a>&gt; and announced on the &lt;standards@xmpp.org&gt; mailing list.</p><hr /><h2>Table of Contents</h2><div class="indent"><p><br />1.  <a href="#intro">Introduction</a><br />   
+      1.1.  <a href="#example-seq1">Example: Prover has access to a shared secret</a><br />   
+      1.2.  <a href="#example-seq2">Example: User has access to the   shared secret</a><br />2.  <a href="#reqs">Requirements</a><br />3.  <a href="#disco">Discovery</a><br />4.  <a href="#glossary">Glossary</a><br />5.  <a href="#usecases">Use Cases</a><br />   
       5.1.  <a href="#set-random">Authentication with a random string</a><br />   
       5.2.  <a href="#set-totp">Authentication with a Time-Based One-Time Password (TOTP)</a><br />   
       5.3.  <a href="#set-otpad">Authentication with a One-time pad</a><br />6.  <a href="#errors">Error Handling</a><br />7.  <a href="#impl">Implementation Notes</a><br />8.  <a href="#rules">Business Rules</a><br />9.  <a href="#security">Security Considerations</a><br />10.  <a href="#iana">IANA Considerations</a><br />11.  <a href="#registrar">XMPP Registrar Considerations</a><br />   
@@ -15,37 +13,253 @@
       11.2.  <a href="#registrar-formtype">Field Standardization</a><br />12.  <a href="#schema">XML Schema</a><br />13.  <a href="#ack">Acknowledgements</a></p><p><a href="#appendices">Appendices</a><br />    <a href="#appendix-docinfo">A: Document Information</a><br />    <a href="#appendix-authorinfo">B: Author Information</a><br />    <a href="#appendix-legal">C: Legal Notices</a><br />    <a href="#appendix-xmpp">D: Relation to XMPP</a><br />    <a href="#appendix-discuss">E: Discussion Venue</a><br />    <a href="#appendix-conformance">F: Requirements Conformance</a><br />    <a href="#appendix-notes">G: Notes</a><br />    <a href="#appendix-revs">H: Revision History</a></p></div><hr /><h2>1.
        <a name="intro" id="intro">Introduction</a></h2>
 	<p class="" style="">
-		This document offers mechanisms to solve the following problem: 
-		There are two XMPP client entities (Verifier and Prover). The 
-		Verifier can be presenting e.g., a physical device, an application 
-		or a service and and the Prover is presenting an XMPP account of 
-		user entity (e.g., a human) that wants to login.
+		Two-factor authentication is used, e.g., in web services 
+		such as online banking, social networks and email to offer
+		additional level for security of authentication procedure.	
 		
-		The Prover MUST be authenticated before the Verifier can execute 
-		or ask executing any access control mechanism, e.g., to check if
-		the Prover's XMPP account is authorized use certain resource(s). 
-		We present usage of two-factor authentication in which the following
-		authentication factors are used:
+		There exists no XMPP extension protocol describing how to 
+		transmit information related to additional authentication factors.
+		
+		Two-factor authentication requires the use of two of the three 
+		authentication factors.
+		
+		These three factors are 
+		a knowledge factor 
+		 meaning something only the user knows (passwords, PINs), 
+		a possession factor 
+		 meaning something only the user has (smart cards, phones, tokens), and 
+		a inherence factor 
+		 meaning something only the user is (biometrics).
+	</p>
+	<p class="" style="">
+		Entities in this document are 
+		two XMPP client applications (of Verifier and Prover),
+		two XMPP account (Verifier and Prover), 
+		XMPP server(s) of these two accounts,
+		and users of these two accounts.
+	</p>
+	<p class="" style="">
+		Verifier's XMPP account logins from Verifier XMPP client,
+		automatically using existing credentials.
+		
+		A human user logins using his/her credentials from 
+		the Prover client.
+		
+		The Verifier XMPP client authenticates (the user of) the Prover 
+		by checking if the Prover is able to transmit a shared secret 
+		to the Verifier, using described ad-hoc commands.
+	</p>
+	<p class="" style="">
+		This document describes authentication mechanisms which can be
+		used for checking, e.g., 
+		<ul class="" style="">
+		<li class="" style="">if used Prover's XMPP account exists,</li>
+		<li class="" style="">if user of Prover's XMPP account knows or have required 
+		credentials to login to this account,</li>
+		<li class="" style="">if the Prover and the Verifier XMPP accounts login from certain XMPP clients,</li>
+		<li class="" style="">if the Prover's XMPP client knows full JID of the Verifier account in a certain XMPP client, and</li>
+		<li class="" style="">if user of the Prover XMPP client, the Prover XMPP client, or some other
+			entity is able to access to a shared secret and provide
+			it using the Prover XMPP client during a wanted time window.</li>
+		</ul>
+		 
+		 This shared secret MAY be transmitted and/or stored, e.g.,
+		 <ul class="" style="">
+			<li class="" style="">to a trusted platform module (TPM) of certain device,</li>
+			<li class="" style="">to certain smart card (such as SIM), or</li>
+			<li class="" style="">to a certain application in certain device.</li>
+		</ul>
+		
+		In other words, the user the user or some other entity 
+		participating to the authentication procedure MUST have or have 
+		access something (where the secret is transmitted and/or stored).
+		This means that the possession factor is present.
+		
+		At the moment, this document describes transmitting 
+		a random string, 
+		a Time-Based One-time Password (TOTP) or 
+		a One-time pad 
+		using XMPP's Ad-Hoc Commands, and using them for authentication.
+	</p>
+	<p class="" style="">
+		This document offers mechanisms to be used, e.g., in the 
+		following scenarios:
+	</p>
+	<p class="" style="">
+	<ul class="" style="">
+		<li class="" style="">
+			Romeo rents a bike from a rental store.
+			
+			Access control of the bike is based on XMPP and an SMS, so	
+			Romeo tells his XMPP account JID and phone number to a 
+			merchant.
+			
+			Romeo installs store's bike application to his smart phone.
+
+			The application enables 
+			pairing of the smart phone with sensors connected to the bike, 
+			unlocking bike's electric motor, and 
+			publishing information from the bike to different services 
+			 such as to rental store's web service.
+			
+			The merchant adds Romeo's account to the list of paid 
+			customers for a fixed time and maps his phone number to
+			certain bike application.
+			
+			Romeo starts the application, logins to his XMPP account, 
+			gets a password in an SMS to his phone, enters it 
+			to a form in the application, is authenticated and 
+			authorized (during the fixed time) to start the motor in 
+			the electric bike. 
+			
+			For the privacy reasons, the store does not publish location 
+			of Romeo's account (in this scenario a Prover) but account 
+			of their bike (a Verifier), and so all traffic from 
+			the phone comes from the Verifier to their services.
+			
+			Romeo asks the merchant to add Julia's JID to be able to
+			access location of the bike he rented.
+			
+			Rental store's security policies allow only their own 
+			applications to access to their services. 
+
+			<ul class="" style=""><li class="" style="">
+			In this scenario, Romeo's XMPP credentials can be thought 
+			of as a knowledge factor.	
+			
+			SIM card is a possession factor, without
+			it Romeo would not get the required password. Password 
+			received to the SIM and inserted to the application, 
+			again, is certainly a knowledge factor, because Romeo knows
+			it. 
+			
+			PIN which is used to open the SIM could be thought of as a 
+			knowledge factor but it does not really relate to this 
+			scenario.		
+			
+			The bike application can be thought of to be another
+			possession factor. Romeo has to possess the 
+			application	but does not have to know anything related to it.
+			Verifier's credentials stored in the bike application are not 
+			known by Romeo.
+			</li></ul>
+		</li>
+		<li class="" style="">
+			Julia has installed rental stores' map application which 
+			shows locations of certain bikes (XMPP accounts) in a map, 
+			to her smart phone.
+			
+			She has received a Bluetooth dongle from the store to be used
+			in the authentication procedure. She has paired it with her
+			phone and bike application. Dongle has a button which has 
+			to be pressed when someone logins from the application.
+
+			Julia starts the application, logins to her XMPP account, 
+			presses the flashing button in the dongle, is 
+			authenticated, and authorized to access the location of the
+			bike Romeo has rented.
+
+			She hurries to Romeo's current location.
+			
+			<ul class="" style=""><li class="" style="">
+			In this scenario Julia's XMPP credentials can be thought of 
+			as a knowledge factor.	
+			
+			The bike application is a possession factor, 
+			because	Julia does have to know anything related to it, 
+			just have and use it in her phone. 
+			
+			Dongle certainly is a possession factor without any 
+			knowledge factors, because Julia just MUST have it and 
+			press the button right after logging in. 
+			
+			Julia does not see or know a shared secret trasmitted 
+			from the Verifier to the dongle and read from dongle by the 
+			Prover.
+			
+			Verifier's credentials stored in the bike application are not 
+			known by Julia.
+			</li></ul>
+		</li>
+		<li class="" style="">
+			Romeo and Julia meet. 
+			
+			Julia gives her family's USB dongle that has a LED screen 
+			and her smart phone to Romeo. 
+			
+			The smart phone has a pre-installed application 
+			to lock/unlock doors in Julia's home.
+			
+			Romeo comes outside of Julia's home.
+			
+			Sadly, he hasn't asked Julia's XMPP account's credentials
+			so he decides to login anonymously from the phone. 
+			
+			Romeo has luck, because house accepts anonymous logins, 
+			because of possible alarm situations.
+			
+			USB dongle shows a password. 
+			
+			Romeo enters the password to a form of the application in
+			the Julia's smart phone. 
+
+			Anonymous XMPP account is correctly authenticated 
+			(so it was correctly logged in from the correct application 
+			in correct phone 
+			and Romeo has access to the Julia's 
+			family's USB dongle), 
+			but sadly anonymous XMPP account is not authorized 
+			to use the door unlocking mechanisms because there is no
+			alarm present in the house.  
+
+			So... Romeo cannot visit Julia secretly during 
+			this night.
+			
+			<ul class="" style=""><li class="" style="">
+			Here Julia's XMPP credentials can be thought of as knowledge 
+			factors.
+
+			Dongle is a possession factor, but
+			a password presented by the dongle, on the other hand, can be
+			thought of as a knowledge factor.
+			
+			Bike application is a possession factor.
+			Romeo does not have any knowledge related to it.
+			</li></ul>
+		</li>
+	</ul>
+	</p>
+	<p class="" style="">
+		The Prover SHOULD be authenticated before the Verifier can 
+		execute or ask executing any access control mechanism, e.g., to 
+		check if the Prover's XMPP account is authorized use certain 
+		resource(s). 
+		The following factors have been used:
 	</p>
 	<ul class="" style="">
 		<li class="" style="">
-			A knowledge factor that means something only the user knows. 
-			In this application this knowledge are a shared secret known 
-			only by the Prover and Verifier, and a full JID of the 
-			Verifier. A secret, or a password calculated from 
-			this secret MUST be sent to this full JID.
+			The first factor is a knowledge factor. 
+			Knowledge factors here could be 
+			a shared secret known only by the Prover and Verifier, 
+			knowing the correct and used authentication mechanisms,
+			and a full JID of the Verifier. 
+			A secret, or a password calculated from 
+			the shared secret MUST be sent to only this full JID using 
+			the	described ad-hoc commands.
 
 			Notice that	Prover's XMPP account's username and password 
 			are not necessarily used as knowledge factors, if, e.g., 
-			mechanisms presented in <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0175.html">Best Practices for Use of SASL ANONYMOUS (XEP-0175)</a></span>  [<a href="#nt-idp22647312">1</a>] are used.
+			mechanisms presented in <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0175.html">Best Practices for Use of SASL ANONYMOUS (XEP-0175)</a></span>  [<a href="#nt-idp1509840">1</a>] are used.
 		</li>
 		<li class="" style="">
-			The second factor is a possession factor that means some 
-			entity only	the user has or is able to access. This entity 
-			COULD be, e.g., a device or application that the user wants 
-			to use, or an external device showing the shared secret to 
-			the user. The shared secret MUST be transmitted only
-			to this certain entity, that the Prover is able to access.
+			The second factor is a possession factor. This entity 
+			COULD be, e.g., a device or application that the user has, 
+			or an external device showing the secret or the password to 
+			the user.
+			
+			The shared secret MUST be transmitted only
+			to this certain entity, e.g., with SMS to certain mobile 
+			phone number (SIM card), that the Prover is able to access.
 		</li>
 	</ul>
 	<p class="" style="">
@@ -53,59 +267,78 @@
 		approve authentication inside only a certain time-slot.
 	</p>
 	<p class="" style="">
-		Prover and Verifier entities mean same as in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a></span>  [<a href="#nt-idp22653472">2</a>] but are 
-		implemented as two XMPP clients. When using terms of <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0146.html">Remote Controlling Clients (XEP-0146)</a></span>  [<a href="#nt-idp23518656">3</a>],
+		Prover and Verifier entities mean same as in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a></span>  [<a href="#nt-idp1520144">2</a>] but are 
+		implemented as two XMPP clients. When using terms of <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0146.html">Remote Controlling Clients (XEP-0146)</a></span>  [<a href="#nt-idp1516048">3</a>],
 		Prover is Local Client and Verifier is Remote Client.
 	</p>
 	<p class="" style="">
-		Several mechanisms for client-to-client authentication, such as 
-		<span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0250.html">C2C Authentication Using TLS (XEP-0250)</a></span>  [<a href="#nt-idp23523648">4</a>] exist and some of them SHOULD be used with the protocol 
-		defined in this document. This document describes a new simple and 
-		extendable protocol for two-factor one-way client authentication 
-		by specifying a profile on <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0050.html">Ad-Hoc Commands (XEP-0050)</a></span>  [<a href="#nt-idp23533344">5</a>]. One-way here means that 
-		the actual user (e.g, a human) of Prover's XMPP Client is not 
-		required to authenticate the Verifier.
+		Several mechanisms for client-to-client (C2C) authentication, such as 
+		<span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0250.html">C2C Authentication Using TLS (XEP-0250)</a></span>  [<a href="#nt-idp1522496">4</a>] exist and at least one of them SHOULD be used with the 
+		protocol defined in this document.
+		Read more from <a href="#security">Securityn</a> section.
 	</p>
-	<div class="indent"><h3>1.1 <a name="example-seq" id="example-seq">Simplified example sequence</a></h3>
 	<p class="" style="">
-	<p class="caption"><a name="example-1" id="example-1"></a>Example 1. Simplified example sequence with clients in two   different domains</p><div class="indent"><pre class="prettyprint">
+		This document describes a new simple and extendable protocol 
+		for transmitting information to be used in two-factor one-way 
+		client authentication by specifying a profile on <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0050.html">Ad-Hoc Commands (XEP-0050)</a></span>  [<a href="#nt-idp1526048">5</a>]. 
+		One-way here means that the actual user (e.g, a human) of 
+		Prover's XMPP Client is not required to authenticate 
+		the Verifier.
+	</p>
+	<div class="indent"><h3>1.1 <a name="example-seq1" id="example-seq1">Example: Prover has access to a shared secret</a></h3>
+	<p class="" style="">
+		The following example presents a use case enabled by this XEP. 
+		
+	<p class="caption"><a name="example-1" id="example-1"></a>Example 1. Simplified example sequence of verifying that the   Prover has access to a shared secret</p><div class="indent"><pre class="prettyprint">
 
-    +----------------+                  +----------------+    
-    |  Prover in     |&lt;------(1.)------&gt;|  XMPP server   |     
-    |   domain Y     |                  |      in        |    
-    |                |&lt;------(6.)------&gt;|    domain Y    |    
-    +----------------+                  +----------------+    
-        |   ^   ^                               ^             
-        |   |   |                               |             
-       (2.)(4.)(5.)                            (6.)           
-        |   |   |                               |             
-        V   |   |                               V             
-    +----------------+                  +----------------+    
-    | Verifier in    |&lt;------(1.)------&gt;|  XMPP server   |    
-    |   domain X     |                  |      in        |    
-    | (3.) (7.) (8.) |&lt;------(6.)------&gt;|    domain X    |    
-    +----------------+                  +----------------+    
+    +-----------------+                  +-----------------+    
+    |    Prover in    |&lt;------(1.)------&gt;|   XMPP server   |     
+    |     domain Y    |                  |       in        |    
+    |                 |&lt;------(7.)------&gt;|     domain Y    |    
+    +-----------------+                  +-----------------+    
+       |   ^   ^   ^                              ^             
+       |   |   |   |                              |             
+      (2.)(4.)(5.)(6.)                           (7.)           
+       |   |   |   |                              |             
+       V   |   |   |                              V             
+    +-----------------+                  +-----------------+    
+    | Verifier in     |&lt;------(1.)------&gt;|   XMPP server   |    
+    |   domain X      |                  |       in        |    
+    |(3.)(8.)(9.)(10.)|&lt;------(7.)------&gt;|     domain X    |    
+    +-----------------+                  +-----------------+    
 
 
 </pre></div>
 	</p>
 	<p class="" style="">
 		<ol start="" class="" style="">
-			<li class="" style="">Prover and Verifier login.</li>
+			<li class="" style="">The Prover and the Verifier login.</li>
 			<li class="" style="">The Verifier discovers that the Prover wants 
 			to authenticate, or access and use, e.g., certain resource, 
 			device, or service. Full JID of	the Prover is now known by 
 			the Verifier. Discovery mechanism is implementation 
 			specific and out of scope of this document.</li>
-			<li class="" style="">The Verifier generates a secret.</li>
-			<li class="" style="">The Verifier transmits this secret through a 
-			secure channel to the Prover, in practice, e.g, to an entity 
-			which is a device or an application the Prover is using or 
-			is able to access. This secure channel is implementation 
-			specific and out of scope of this document.</li>
-			<li class="" style="">The Verifier transmits its own full JID through 
-			a secure channel to the Prover. This secure channel is 
-			implementation specific and out of scope of this document.</li>
+			<li class="" style="">The Verifier selects an authentication
+			mechanism to be used and generates a related secret, e.g.,
+			a random string, a secret key and message for OTP, or a secret
+			key for TOTP. The Verifier MAY implement one or more 
+			authentication mechanisms presented in this document. 
+			How the mechanisms are selected are implementation specific 
+			and out of scope of this document.</li>
+			<li class="" style="">The Verifier transmits information about 
+			the used authentication mechanism through
+			a secure channel to the Prover. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
+			<li class="" style="">The Verifier transmits its own full JID 
+			through a secure channel to the Prover. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
+			<li class="" style="">The Verifier transmits the secret through 
+			a secure channel to the Prover or to an entity 
+			which Prover or user of the Prover has to be able to access. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
 			<li class="" style="">The Prover and the Verifier communicate using 
 			ad-hoc commands presented in this document, and the secret is 
 			transmitted from Prover to the Verifier.
@@ -113,44 +346,121 @@
 			<li class="" style="">The Verifier checks the sender and content in 
 			ad-hoc commands. If the secret is correct and the sender's 
 			full JID is same as	Prover's full JID received in 
-			<a href="#2">step (2.)</a>, the Verifier can be sure that 
+			<a href="#e1-2">step (2.)</a>, the Verifier can be sure that 
 			the Prover has access to the entity described in 
-			<a href="#4">(step 4.)</a> and knows Verifier's full JID 
-			transmitted in <a href="#5">(step 5.)</a>.</li>
+			<a href="#e1-5">(step 5.)</a> and knows Verifier's full JID 
+			transmitted in <a href="#e1-6">(step 6.)</a>.</li>
 			<li class="" style="">The Verifier MAY start executing
 			internal or external access control procedures which are 
 			shortly	discussed in <a href="#rules">Business rules</a> 
 			section. Various access control procedures MAY be executed 
 			also during the authentication procedure to, e.g., enable 
 			only certain JIDs to be able to authenticate.</li>
+			<li class="" style="">Based on the access control rules,
+			the user of the Prover client MAY be 
+			authorized to access or start a wanted resource, service, 
+			or device.
+			</li>
 		</ol>
 	</p>
 	<p class="" style="">
-		Notice that it is possible that there is only one domain, so 
-		both Prover and Verifier are, e.g., in domain X in the 
+		When talking about transmitting information to the Prover using 
+		a secure channel, in practice, this information is transmitted 
+		to an entity which is a device or an application the Prover is 
+		using or executed in, or a device or application the 
+		authenticated user or the Prover are able to access. 
+		Examples of such devices and applications are 
+		trusted platform modules (TPM) and SIM cards,
+		smart phones, USB tokens or tokens with a display.  
+		Example secure channels MAY be, e.g., SMS, writing and reading
+		to/from TPM, and installing a correctly signed application able
+		to calculate the current secret.
+	</p>
+	<p class="" style="">
+		Steps 4., 5., and 6. MAY be implemented to be executed simultaneously
+		and using the same secure channel, but they MAY be executed also
+		in different steps using different secure channels.
+	</p>
+	<p class="" style=""> 
+		 Notice that it is possible that there is only one domain, so 
+		 both Prover and Verifier would be, e.g., in domain X. 
+	</p>	
+	</div>
+	<div class="indent"><h3>1.2 <a name="example-seq2" id="example-seq2">Example: User has access to the   shared secret</a></h3>
+	<p class="" style="">
+		The following sequence diagram presents the same use case as
+		example 1 but a bit differently (XMPP servers are not presented
+		in the figure and steps 1. and 6. have more details and step 10. 
+		is presented as starting the wanted resource, service or device.
+	</p>
+ 
+	<p class="caption"><a name="example-2" id="example-2"></a>Example 2. Sequence diagram use case of verifying   that user has access to the shared secret</p><div class="indent"><pre class="prettyprint">
+
+
+  User            Prover         Verifier         Location      A resource, 
+ (person)         client          client        of the secret    a service,
+    |               |                |               |          or a device
+    |     (1a.)    (1b.)            (1c.)            |              |
+    |--------------&gt;|      (2.)      |               |              |
+    |               |---------------&gt;|               |              |
+    |               |               (3.)             |              |
+    |               |   (4.)(5.)     |               |              |
+    |               |&lt;---------------|               |              |
+    |               |                |      (6a.)    |              |
+    |               |                |--------------&gt;|              |
+    |               |      (6b.)     |               |              |
+    |&lt;----------------------------------------------&gt;|              |
+    |     (6c.)     |                |               |              |
+    |--------------&gt;|      (7.)      |               |              |
+    |               |&lt;--------------&gt;|               |              |
+    |               |               (8.)             |              |
+    |               |               (9.)             |              |
+    |               |                |               |            (10.)
+    
+    
+</pre></div>
+	<p class="" style="">
+		All other steps but 1. and 6. are the same as in 
 		<a href="#example1">example 1</a>.
+	</p>
+	<p class="" style="">
+	    <a href="#e1-1">Step 1. of example 1.</a> is divided into 
+	    three cases: 
+	    In (1a.) the user inputs his/her XMPP account's credentials 
+	    (such as JID and password) to the Prover client login screen, 
+	    in (1b.) the Prover client logins and 
+	    in (1c.) that the Verifier client logins.
+	</p>
+	<p class="" style="">
+	   <a href="#e1-6">Step 6. of example 1.</a> is divided into 
+	    three cases:
+	    In (6a.) the shared secret is transmitted through a secure channel
+	    to an external entity (e.g., with an SMS to a SIM card),
+	    in (6b.) the user reads the secret from this external entity, and
+	    in (6c.) the user inputs the secret to the Prover's to be used
+	    in ad-hoc commands forms.
 	</p>
 	</div>
 <h2>2.
        <a name="reqs" id="reqs">Requirements</a></h2>
     <p class="" style="">This document addresses the following requirements:</p>
-    <ul class="" style="">
+    <ol start="" class="" style="">
         <li class="" style="">Enable the Verifier entity to perform authentication of 
         their users (e.g., humans) by verifying that a Prover entity 
         holds a shared secret.</li>
 		<li class="" style="">Verifier's and Prover's XMPP accounts do not necessarily need
 		to know each other before starting the authentication procedure
-		nor be in each rosters.</li>
+		nor be in rosters of each other.</li>
         <li class="" style="">Re-use existing XMPP and Jabber protocols wherever possible.</li>
-    </ul>
+    </ol>
 <h2>3.
        <a name="disco" id="disco">Discovery</a></h2>
     <p class="" style="">
 		A client MAY advertise any authentication commands it 
-		supports via <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0030.html">Service Discovery (XEP-0030)</a></span>  [<a href="#nt-idp23561424">6</a>] (as described in <span class="ref">XEP-0050</span>).
+		supports via <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0030.html">Service Discovery (XEP-0030)</a></span>  [<a href="#nt-idp1578960">6</a>] (as described in <span class="ref">XEP-0050</span>).
     </p>
     <p class="" style="">
-		If these commands are advertised, <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0115.html">Entity Capabilities (XEP-0115)</a></span>  [<a href="#nt-idp23565840">7</a>] can be used to 
+		If these commands are advertised, <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0115.html">Entity Capabilities (XEP-0115)</a></span>  [<a href="#nt-idp1582720">7</a>] can be used to 
 		query capability of authentication commands in a client.
 		If the Prover and the Verifier are working on a same physical 
 		device, they both MAY know the exact format and existence of 
@@ -164,21 +474,33 @@
   </p>
   <div class="indent"><dl>
     <di><dt><strong>HMAC</strong></dt><dd>Keyed-Hashing for Message Authentication</dd></di>
+  
     <di><dt><strong>HMAC-SHA-256</strong></dt><dd>HMAC-SHA-256 is the realization of the 
     HMAC message authentication code using the SHA-256 hash function.</dd></di>
+  
     <di><dt><strong>HMAC-SHA-512</strong></dt><dd>HMAC-SHA-512 is the realization of the 
     HMAC message authentication code using the SHA-512 hash function.</dd></di>
+  
     <di><dt><strong>HOTP</strong></dt><dd>HMAC-Based One-Time Password Algorithm</dd></di>
+  
     <di><dt><strong>Local Client</strong></dt><dd>An XMPP client that wants to authenticate 
     itself to Remote Client.</dd></di>
+   
     <di><dt><strong>One-time pad</strong></dt><dd>Example of perfectly secret encryption scheme.</dd></di>
+  
     <di><dt><strong>OTP</strong></dt><dd>A one-time password is a password that is valid 
     for only one login session or transaction.</dd></di>
+  
     <di><dt><strong>Prover</strong></dt><dd>Same as Local Client.</dd></di>
+  
     <di><dt><strong>Remote Client</strong></dt><dd>An XMPP client that authenticates Local Client.</dd></di>
+  
     <di><dt><strong>SHA</strong></dt><dd>US Secure Hash Algorithms</dd></di>
+   
     <di><dt><strong>Time-window</strong></dt><dd>Lenght of time when the secret is valid.</dd></di>
+   
     <di><dt><strong>TOTP</strong></dt><dd>Time-Based One-Time Password Algorithm</dd></di>
+  
     <di><dt><strong>Verifier</strong></dt><dd>Same as Remote Client.</dd></di>
   </dl></div>
 <h2>5.
@@ -192,18 +514,20 @@
         <li class="" style="">Authenticate with a random string</li>
         <li class="" style="">Authenticate with a Time-Based One-Time Password (TOTP)</li>
         <li class="" style="">Authenticate with a One-time pad</li>
+        <li class="" style="">Authenticate with...</li>
     </ol>
 	<p class="" style="">
 		Although this document aims to define common use cases for 
 		authentication,	an implementation or deployment MAY support any 
-		subset and MAY support additional commands not defined herein.
+		subset and MAY support additional authentication mechanisms
+		and ad-hoc commands not defined herein.
 	</p>
     <p class="" style="">
 		<span class="em">Note: The text that follows assumes that implementors have 
 		read and understood <span class="ref">XEP-0050</span>, password 
-		generation algorithms described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4226">RFC 4226</a></span>  [<a href="#nt-idp23594128">8</a>] and 
+		generation algorithms described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4226">RFC 4226</a></span>  [<a href="#nt-idp1608128">8</a>] and 
 		<span class="ref">RFC 6238</span></span>,	and randomness requirements 
-		described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4086">RFC 4086</a></span>  [<a href="#nt-idp23603824">9</a>],	and know about one-time pads and perfect 
+		described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4086">RFC 4086</a></span>  [<a href="#nt-idp1611040">9</a>],	and know about one-time pads and perfect 
 		secrecy.
 	</p>
 
@@ -214,15 +538,15 @@
 			Random string is a sequence of characters in random sequency.
 			A random sequency is a sequence in which each successive 
 			value is obtained merely by chance. None of the values is 
-			dependent upon the preceding value in the sequence. <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4949">RFC 4949</a></span>  [<a href="#nt-idp23606800">10</a>]
+			dependent upon the preceding value in the sequence. <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4949">RFC 4949</a></span>  [<a href="#nt-idp1616080">10</a>]
 		</p>
 		<p class="" style="">
 			It is possible to enable random string to be valid only 
 			during a certain time-window. 
 		</p>
-		<p class="caption"><a name="example-2" id="example-2"></a>Example 2. Local Client (Prover) requests to authenticate with a random string to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+		<p class="caption"><a name="example-3" id="example-3"></a>Example 3. Local Client (Prover) requests to authenticate with a random string to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-random-1'
     xml:lang='en'&gt;
@@ -238,9 +562,9 @@
 		</p>
         
    
-        <p class="caption"><a name="example-3" id="example-3"></a>Example 3. Remote Client (Verifier) replies with a form to set a random string</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-4" id="example-4"></a>Example 4. Remote Client (Verifier) replies with a form to set a random string</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-random-1'
     xml:lang='en'&gt;
@@ -262,9 +586,15 @@
   &lt;/command&gt;
 &lt;/iq&gt;
         </pre></div>
-        <p class="caption"><a name="example-4" id="example-4"></a>Example 4. Local Client (Prover) submits the random string form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+        <p class="" style="">
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user. If the form is presented, the user inputs the 
+			random string to it. Otherwise the Prover client inserts the
+			random string to the form automatically. 
+        </p>
+        <p class="caption"><a name="example-5" id="example-5"></a>Example 5. Local Client (Prover) submits the random string form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-random-2'
     xml:lang='en'&gt;
@@ -283,9 +613,9 @@
 			After receiving a random string, the Verifier informs Prover 
 			of completion.
 		</p>
-        <p class="caption"><a name="example-5" id="example-5"></a>Example 5. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-6" id="example-6"></a>Example 6. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-random-2'
     xml:lang='en'&gt;
@@ -308,9 +638,9 @@
 			factor. In TOTP, time reference and a time step replaces 
 			the counter in the HOTP computation.
 		</p>
-		<p class="caption"><a name="example-6" id="example-6"></a>Example 6. Local Client (Prover) requests to authenticate with a TOTP to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+		<p class="caption"><a name="example-7" id="example-7"></a>Example 7. Local Client (Prover) requests to authenticate with a TOTP to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-totp-1'
     xml:lang='en'&gt;
@@ -325,9 +655,9 @@
 			the service SHOULD return the appropriate form.
 		</p>
         
-        <p class="caption"><a name="example-7" id="example-7"></a>Example 7. Remote Client (Verifier) replies with a form to set a TOTP</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-8" id="example-8"></a>Example 8. Remote Client (Verifier) replies with a form to set a TOTP</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-totp-1'
     xml:lang='en'&gt;
@@ -349,9 +679,13 @@
   &lt;/command&gt;
 &lt;/iq&gt;
         </pre></div>
-        <p class="caption"><a name="example-8" id="example-8"></a>Example 8. Local Client (Prover) submits the TOTP secret form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+        <p class="" style="">
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user.
+        </p>
+        <p class="caption"><a name="example-9" id="example-9"></a>Example 9. Local Client (Prover) submits the TOTP secret form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-totp-2'
     xml:lang='en'&gt;
@@ -370,9 +704,9 @@
 			After receiving a correct secret, the Verifier informs 
 			Prover of completion.
 		</p>
-        <p class="caption"><a name="example-9" id="example-9"></a>Example 9. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-10" id="example-10"></a>Example 10. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-totp-2'
     xml:lang='en'&gt;
@@ -399,16 +733,16 @@
 		<p class="" style="">
 			Notice that if there is not any additional understandable 
 			and confidential information to be encrypted between Prover 
-			and	Verifier, there is no benefits of using One-time pad 
+			and	Verifier, there are no benefits of using One-time pad 
 			instead of a <a href="#set-random">random string</a>.
 		</p>
 		<p class="" style="">
 			It is possible to enable One-time pad to be valid only 
 			during a certain time-window. 
 		</p>
-		<p class="caption"><a name="example-10" id="example-10"></a>Example 10. Local Client (Prover) requests to authenticate with a One-time pad to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+		<p class="caption"><a name="example-11" id="example-11"></a>Example 11. Local Client (Prover) requests to authenticate with a One-time pad to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-otpad-1'
     xml:lang='en'&gt;
@@ -424,9 +758,9 @@
 		</p>
         
    
-        <p class="caption"><a name="example-11" id="example-11"></a>Example 11. Remote Client (Verifier) replies with a form to set a One-time pad</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-12" id="example-12"></a>Example 12. Remote Client (Verifier) replies with a form to set a One-time pad</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-otpad-1'
     xml:lang='en'&gt;
@@ -448,9 +782,13 @@
   &lt;/command&gt;
 &lt;/iq&gt;
         </pre></div>
-        <p class="caption"><a name="example-12" id="example-12"></a>Example 12. Local Client (Prover) submits the One-time pad form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+        <p class="" style="">
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user.
+        </p>        
+        <p class="caption"><a name="example-13" id="example-13"></a>Example 13. Local Client (Prover) submits the One-time pad form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-otpad-2'
     xml:lang='en'&gt;
@@ -466,12 +804,12 @@
 &lt;/iq&gt;
         </pre></div>
         <p class="" style="">
-			After receiving a One-time pad, the Verifier informs Prover 
-			of completion.
+			After receiving a One-time pad, the Verifier informs the 
+			Prover of completion.
 		</p>
-        <p class="caption"><a name="example-13" id="example-13"></a>Example 13. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
-&lt;iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+        <p class="caption"><a name="example-14" id="example-14"></a>Example 14. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-otpad-2'
     xml:lang='en'&gt;
@@ -521,7 +859,7 @@
         </tr>        
     </table></div>
       
-    <p class="" style="">For the syntax of these errors, see <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0086.html">Error Condition Mappings (XEP-0086)</a></span>  [<a href="#nt-idp23683120">11</a>]. Naturally, other 
+    <p class="" style="">For the syntax of these errors, see <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0086.html">Error Condition Mappings (XEP-0086)</a></span>  [<a href="#nt-idp1670592">11</a>]. Naturally, other 
     errors MAY be returned as well.</p>
 <h2>7.
        <a name="impl" id="impl">Implementation Notes</a></h2>
@@ -534,8 +872,8 @@
 		There are several secure ways to transmit the random string, 
 		One-time pads or the shared secret that is used in TOTP from 
 		Verifier to the Prover. As described in 
-		<a href="#example1">example 1.</a>, description of the
-		secure channel is out of scope of this document. 
+		<a href="#example1">example 1.</a>, descriptions of all
+		secure channels are out of scope of this document. 
 		As an example, if both Verifier and Prover entities are running 
 		in one application inside one device, the shared secret can be 
 		generated and transmitted inside running implementation and be 
@@ -589,7 +927,7 @@
 	</ul>
 	<p class="" style="">
 		In each case, the Verifier MAY check Prover's JID right after 
-		receiving an ad-hoc command or after a succesful authentication 
+		receiving an ad-hoc command or after a successful authentication 
 		process. 
 	</p>
 	<p class="" style="">
@@ -597,21 +935,28 @@
 		reply with &lt;forbidden/&gt; error message.
 	</p>
 	<p class="" style="">
-		After the a succesful verification the Verifier can, e.g.,
+		After the a successful verification the Verifier can, e.g.,
 	</p>
 	<ul class="" style="">
 		<li class="" style="">start the wanted process,</li>
 		<li class="" style="">ask access rights from additional provision servers, 
-		e.g. with <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0324.html">Internet of Things - Provisioning (XEP-0324)</a></span>  [<a href="#nt-idp23707808">12</a>], and/or</li>
+		e.g. with <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0324.html">Internet of Things - Provisioning (XEP-0324)</a></span>  [<a href="#nt-idp1693248">12</a>], and/or</li>
 		<li class="" style="">give access to the wanted resource.</li>
 	</ul>
 	<h2>9.
        <a name="security" id="security">Security Considerations</a></h2>
 	<p class="" style="">
+		If both the Prover and the Verifier are not	using the same 
+		trusted XMPP server or are not using authenticated and encrypted
+		client-to-server or server-to-server (S2S) connections, end-to-end
+		C2C security MUST be established between the Prover and the Verifier,
+		e.g., by using <span class="ref">XEP-0250</span>.
+	</p>
+	<p class="" style="">
 		In this protocol, the resourcepart of a JID is a required 
 		identifier to uniquely identify a specific connection or object 
 		belonging to the entity associated with an XMPP localpart at a 
-		domain. Without an unique resourcepart, ad-hoc commands do not 
+		domain. Without a unique resourcepart, ad-hoc commands do not 
 		necessarily go to correct entities.
 	</p>
 	<p class="" style="">
@@ -663,7 +1008,7 @@
 		anything about the Verifier. The Prover XMPP client will know 
 		Verifiers full JID, but it is not necessarily told to the 
 		human user. In addition to this, the user does not necessarily 
-		know what the device or the application will do after a succesful 
+		know what the device or the application will do after a successful 
 		authentication. Notice that this problem relates to every 
 		closed source XMPP client implementations, thus implementations'
 		code SHOULD be open source.
@@ -681,7 +1026,7 @@
 <h2>10.
        <a name="iana" id="iana">IANA Considerations</a></h2>
 	<p class="" style="">
-		This document requires no interaction with the <span class="ref" style=""><a href="http://www.iana.org/">Internet Assigned Numbers Authority (IANA)</a></span>  [<a href="#nt-idp23731488">13</a>].
+		This document requires no interaction with the <span class="ref" style=""><a href="http://www.iana.org/">Internet Assigned Numbers Authority (IANA)</a></span>  [<a href="#nt-idp1717872">13</a>].
 	</p>
 <h2>11.
        <a name="registrar" id="registrar">XMPP Registrar Considerations</a></h2>
@@ -692,7 +1037,7 @@
     </div>
 
     <div class="indent"><h3>11.2 <a name="registrar-formtype" id="registrar-formtype">Field Standardization</a></h3>
-        <p class="" style=""><span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0068.html">Field Standardization for Data Forms (XEP-0068)</a></span>  [<a href="#nt-idp23743024">14</a>] defines a process for standardizing the fields used 
+        <p class="" style=""><span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0068.html">Field Standardization for Data Forms (XEP-0068)</a></span>  [<a href="#nt-idp1724208">14</a>] defines a process for standardizing the fields used 
         within Data Forms scoped by a particular namespace 
         (see also &lt;<a href="http://xmpp.org/registrar/formtypes.html">http://xmpp.org/registrar/formtypes.html</a>&gt;). The reserved fields for the 
         'http://jabber.org/protocol/auth' namespace are specified 
@@ -723,7 +1068,9 @@
 <h2>13.
        <a name="ack" id="ack">Acknowledgements</a></h2>
 	<p class="" style="">
-		Thanks to Kimmo Halunen, Sami Lehtonen, Kevin, Sergey Dobrov and Elina for all valuable feedback.
+		Thanks to Kimmo Halunen, Sami Lehtonen, Jouni Hiltunen, 
+		Dave Cridland, Kevin, Sergey Dobrov, and Elina for all 
+		questions and valuable feedback.
 	</p>
 <hr /><a name="appendices" id="appendices"></a><h2>Appendices</h2><hr /><a name="appendix-docinfo" id="appendix-docinfo"></a><h3>Appendix A: Document Information</h3><p class="indent">
             Series: <a href="http://xmpp.org/extensions/">XEP</a><br />
@@ -733,8 +1080,8 @@
             <a href="http://xmpp.org/extensions/xep-0001.html#states-ProtoXEP">ProtoXEP</a><br />
             Type:
             <a href="http://xmpp.org/extensions/xep-0001.html#types-Informational">Informational</a><br />
-            Version: Draft of 0.0.2<br />
-            Last Updated: 2014-02-04<br />
+            Version: Draft of 0.0.3<br />
+            Last Updated: 2014-03-19<br />
                 Approving Body: <a href="http://xmpp.org/council/">XMPP Council</a><br />Dependencies: XMPP Core, XEP-0050<br />
                 Supersedes: None<br />
                 Superseded By: None<br />
@@ -745,13 +1092,24 @@
         Email:
         <a href="mailto:Teemu.Vaisanen@vtt.fi">Teemu.Vaisanen@vtt.fi</a><br />
         JabberID: 
-        <a href="xmpp:uolevi@gmail.com">uolevi@gmail.com</a><br /></p></div><hr /><a name="appendix-legal" id="appendix-legal"></a><h3>Appendix C: Legal Notices</h3><div class="indent"><h4>Copyright</h4>This XMPP Extension Protocol is copyright (c) 1999 - 2013 by the XMPP Standards Foundation (XSF).<h4>Permissions</h4>Permission is hereby granted, free of charge, to any person obtaining a copy of this specification (the "Specification"), to make use of the Specification without restriction, including without limitation the rights to implement the Specification in a software program, deploy the Specification in a network service, and copy, modify, merge, publish, translate, distribute, sublicense, or sell copies of the Specification, and to permit persons to whom the Specification is furnished to do so, subject to the condition that the foregoing copyright notice and this permission notice shall be included in all copies or substantial portions of the Specification. Unless separate permission is granted, modified works that are redistributed shall not contain misleading information regarding the authors, title, number, or publisher of the Specification, and shall not claim endorsement of the modified works by the authors, any organization or project to which the authors belong, or the XMPP Standards Foundation.<h4>Disclaimer of Warranty</h4><span style="font-weight: bold">## NOTE WELL: This Specification is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. In no event shall the XMPP Standards Foundation or the authors of this Specification be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Specification or the implementation, deployment, or other use of the Specification. ##</span><h4>Limitation of Liability</h4>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall the XMPP Standards Foundation or any author of this Specification be liable for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising out of the use or inability to use the Specification (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if the XMPP Standards Foundation or such author has been advised of the possibility of such damages.<h4>IPR Conformance</h4>This XMPP Extension Protocol has been contributed in full conformance with the XSF's Intellectual Property Rights Policy (a copy of which may be found at &lt;<a href="http://www.xmpp.org/extensions/ipr-policy.shtml">http://www.xmpp.org/extensions/ipr-policy.shtml</a>&gt; or obtained by writing to XSF, P.O. Box 1641, Denver, CO 80201 USA).</div><hr /><a name="appendix-xmpp" id="appendix-xmpp"></a><h3>Appendix D: Relation to XMPP</h3><p class="indent">The Extensible Messaging and Presence Protocol (XMPP) is defined in the XMPP Core (RFC 6120) and XMPP IM (RFC 6121) specifications contributed by the XMPP Standards Foundation to the Internet Standards Process, which is managed by the Internet Engineering Task Force in accordance with RFC 2026. Any protocol defined in this document has been developed outside the Internet Standards Process and is to be understood as an extension to XMPP rather than as an evolution, development, or modification of XMPP itself.</p><hr /><a name="appendix-discuss" id="appendix-discuss"></a><h3>Appendix E: Discussion Venue</h3><p class="indent">The primary venue for discussion of XMPP Extension Protocols is the &lt;<a href="http://mail.jabber.org/mailman/listinfo/standards">standards@xmpp.org</a>&gt; discussion list.</p><p class="indent">Discussion on other xmpp.org discussion lists might also be appropriate; see &lt;<a href="http://xmpp.org/about/discuss.shtml">http://xmpp.org/about/discuss.shtml</a>&gt; for a complete list.</p><p class="indent">Errata can be sent to &lt;<a href="mailto:editor@xmpp.org">editor@xmpp.org</a>&gt;.</p><hr /><a name="appendix-conformance" id="appendix-conformance"></a><h3>Appendix F: Requirements Conformance</h3><p class="indent">The following requirements keywords as used in this document are to be interpreted as described in <a href="http://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>: "MUST", "SHALL", "REQUIRED"; "MUST NOT", "SHALL NOT"; "SHOULD", "RECOMMENDED"; "SHOULD NOT", "NOT RECOMMENDED"; "MAY", "OPTIONAL".</p><hr /><a name="appendix-notes" id="appendix-notes"></a><h3>Appendix G: Notes</h3><div class="indent"><p><a name="nt-idp22647312" id="nt-idp22647312">1</a>. XEP-0175: Best Practices for Use of SASL ANONYMOUS &lt;<a href="http://xmpp.org/extensions/xep-0175.html">http://xmpp.org/extensions/xep-0175.html</a>&gt;.</p><p><a name="nt-idp22653472" id="nt-idp22653472">2</a>. RFC 6238: TOTP: Time-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc6238">http://tools.ietf.org/html/rfc6238</a>&gt;.</p><p><a name="nt-idp23518656" id="nt-idp23518656">3</a>. XEP-0146: Remote Controlling Clients &lt;<a href="http://xmpp.org/extensions/xep-0146.html">http://xmpp.org/extensions/xep-0146.html</a>&gt;.</p><p><a name="nt-idp23523648" id="nt-idp23523648">4</a>. XEP-0250: C2C Authentication Using TLS &lt;<a href="http://xmpp.org/extensions/xep-0250.html">http://xmpp.org/extensions/xep-0250.html</a>&gt;.</p><p><a name="nt-idp23533344" id="nt-idp23533344">5</a>. XEP-0050: Ad-Hoc Commands &lt;<a href="http://xmpp.org/extensions/xep-0050.html">http://xmpp.org/extensions/xep-0050.html</a>&gt;.</p><p><a name="nt-idp23561424" id="nt-idp23561424">6</a>. XEP-0030: Service Discovery &lt;<a href="http://xmpp.org/extensions/xep-0030.html">http://xmpp.org/extensions/xep-0030.html</a>&gt;.</p><p><a name="nt-idp23565840" id="nt-idp23565840">7</a>. XEP-0115: Entity Capabilities &lt;<a href="http://xmpp.org/extensions/xep-0115.html">http://xmpp.org/extensions/xep-0115.html</a>&gt;.</p><p><a name="nt-idp23594128" id="nt-idp23594128">8</a>. RFC 4226: HOTP: An HMAC-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc4226">http://tools.ietf.org/html/rfc4226</a>&gt;.</p><p><a name="nt-idp23603824" id="nt-idp23603824">9</a>. RFC 4086: Randomness Requirements for Security &lt;<a href="http://tools.ietf.org/html/rfc4086">http://tools.ietf.org/html/rfc4086</a>&gt;.</p><p><a name="nt-idp23606800" id="nt-idp23606800">10</a>. RFC 4949: Internet Security Glossary, Version 2 &lt;<a href="http://tools.ietf.org/html/rfc4949">http://tools.ietf.org/html/rfc4949</a>&gt;.</p><p><a name="nt-idp23683120" id="nt-idp23683120">11</a>. XEP-0086: Error Condition Mappings &lt;<a href="http://xmpp.org/extensions/xep-0086.html">http://xmpp.org/extensions/xep-0086.html</a>&gt;.</p><p><a name="nt-idp23707808" id="nt-idp23707808">12</a>. XEP-0324: Internet of Things - Provisioning &lt;<a href="http://xmpp.org/extensions/xep-0324.html">http://xmpp.org/extensions/xep-0324.html</a>&gt;.</p><p><a name="nt-idp23731488" id="nt-idp23731488">13</a>. The Internet Assigned Numbers Authority (IANA) is the central coordinator for the assignment of unique parameter values for Internet protocols, such as port numbers and URI schemes. For further information, see &lt;<a href="http://www.iana.org/">http://www.iana.org/</a>&gt;.</p><p><a name="nt-idp23743024" id="nt-idp23743024">14</a>. XEP-0068: Field Data Standardization for Data Forms &lt;<a href="http://xmpp.org/extensions/xep-0068.html">http://xmpp.org/extensions/xep-0068.html</a>&gt;.</p></div><hr /><a name="appendix-revs" id="appendix-revs"></a><h3>Appendix H: Revision History</h3><p>Note: Older versions of this specification might be available at <a href="http://xmpp.org/extensions/attic/">http://xmpp.org/extensions/attic/</a></p><div class="indent"><h4>Version Draft of 0.0.2 (2014-02-04)</h4><div class="indent">
+        <a href="xmpp:uolevi@gmail.com">uolevi@gmail.com</a><br /></p></div><hr /><a name="appendix-legal" id="appendix-legal"></a><h3>Appendix C: Legal Notices</h3><div class="indent"><h4>Copyright</h4>This XMPP Extension Protocol is copyright (c) 1999 - 2014 by the XMPP Standards Foundation (XSF).<h4>Permissions</h4>Permission is hereby granted, free of charge, to any person obtaining a copy of this specification (the "Specification"), to make use of the Specification without restriction, including without limitation the rights to implement the Specification in a software program, deploy the Specification in a network service, and copy, modify, merge, publish, translate, distribute, sublicense, or sell copies of the Specification, and to permit persons to whom the Specification is furnished to do so, subject to the condition that the foregoing copyright notice and this permission notice shall be included in all copies or substantial portions of the Specification. Unless separate permission is granted, modified works that are redistributed shall not contain misleading information regarding the authors, title, number, or publisher of the Specification, and shall not claim endorsement of the modified works by the authors, any organization or project to which the authors belong, or the XMPP Standards Foundation.<h4>Disclaimer of Warranty</h4><span style="font-weight: bold">## NOTE WELL: This Specification is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. In no event shall the XMPP Standards Foundation or the authors of this Specification be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Specification or the implementation, deployment, or other use of the Specification. ##</span><h4>Limitation of Liability</h4>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall the XMPP Standards Foundation or any author of this Specification be liable for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising out of the use or inability to use the Specification (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if the XMPP Standards Foundation or such author has been advised of the possibility of such damages.<h4>IPR Conformance</h4>This XMPP Extension Protocol has been contributed in full conformance with the XSF's Intellectual Property Rights Policy (a copy of which may be found at &lt;<a href="http://www.xmpp.org/extensions/ipr-policy.shtml">http://www.xmpp.org/extensions/ipr-policy.shtml</a>&gt; or obtained by writing to XSF, P.O. Box 1641, Denver, CO 80201 USA).</div><hr /><a name="appendix-xmpp" id="appendix-xmpp"></a><h3>Appendix D: Relation to XMPP</h3><p class="indent">The Extensible Messaging and Presence Protocol (XMPP) is defined in the XMPP Core (RFC 6120) and XMPP IM (RFC 6121) specifications contributed by the XMPP Standards Foundation to the Internet Standards Process, which is managed by the Internet Engineering Task Force in accordance with RFC 2026. Any protocol defined in this document has been developed outside the Internet Standards Process and is to be understood as an extension to XMPP rather than as an evolution, development, or modification of XMPP itself.</p><hr /><a name="appendix-discuss" id="appendix-discuss"></a><h3>Appendix E: Discussion Venue</h3><p class="indent">The primary venue for discussion of XMPP Extension Protocols is the &lt;<a href="http://mail.jabber.org/mailman/listinfo/standards">standards@xmpp.org</a>&gt; discussion list.</p><p class="indent">Discussion on other xmpp.org discussion lists might also be appropriate; see &lt;<a href="http://xmpp.org/about/discuss.shtml">http://xmpp.org/about/discuss.shtml</a>&gt; for a complete list.</p><p class="indent">Errata can be sent to &lt;<a href="mailto:editor@xmpp.org">editor@xmpp.org</a>&gt;.</p><hr /><a name="appendix-conformance" id="appendix-conformance"></a><h3>Appendix F: Requirements Conformance</h3><p class="indent">The following requirements keywords as used in this document are to be interpreted as described in <a href="http://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>: "MUST", "SHALL", "REQUIRED"; "MUST NOT", "SHALL NOT"; "SHOULD", "RECOMMENDED"; "SHOULD NOT", "NOT RECOMMENDED"; "MAY", "OPTIONAL".</p><hr /><a name="appendix-notes" id="appendix-notes"></a><h3>Appendix G: Notes</h3><div class="indent"><p><a name="nt-idp1509840" id="nt-idp1509840">1</a>. XEP-0175: Best Practices for Use of SASL ANONYMOUS &lt;<a href="http://xmpp.org/extensions/xep-0175.html">http://xmpp.org/extensions/xep-0175.html</a>&gt;.</p><p><a name="nt-idp1520144" id="nt-idp1520144">2</a>. RFC 6238: TOTP: Time-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc6238">http://tools.ietf.org/html/rfc6238</a>&gt;.</p><p><a name="nt-idp1516048" id="nt-idp1516048">3</a>. XEP-0146: Remote Controlling Clients &lt;<a href="http://xmpp.org/extensions/xep-0146.html">http://xmpp.org/extensions/xep-0146.html</a>&gt;.</p><p><a name="nt-idp1522496" id="nt-idp1522496">4</a>. XEP-0250: C2C Authentication Using TLS &lt;<a href="http://xmpp.org/extensions/xep-0250.html">http://xmpp.org/extensions/xep-0250.html</a>&gt;.</p><p><a name="nt-idp1526048" id="nt-idp1526048">5</a>. XEP-0050: Ad-Hoc Commands &lt;<a href="http://xmpp.org/extensions/xep-0050.html">http://xmpp.org/extensions/xep-0050.html</a>&gt;.</p><p><a name="nt-idp1578960" id="nt-idp1578960">6</a>. XEP-0030: Service Discovery &lt;<a href="http://xmpp.org/extensions/xep-0030.html">http://xmpp.org/extensions/xep-0030.html</a>&gt;.</p><p><a name="nt-idp1582720" id="nt-idp1582720">7</a>. XEP-0115: Entity Capabilities &lt;<a href="http://xmpp.org/extensions/xep-0115.html">http://xmpp.org/extensions/xep-0115.html</a>&gt;.</p><p><a name="nt-idp1608128" id="nt-idp1608128">8</a>. RFC 4226: HOTP: An HMAC-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc4226">http://tools.ietf.org/html/rfc4226</a>&gt;.</p><p><a name="nt-idp1611040" id="nt-idp1611040">9</a>. RFC 4086: Randomness Requirements for Security &lt;<a href="http://tools.ietf.org/html/rfc4086">http://tools.ietf.org/html/rfc4086</a>&gt;.</p><p><a name="nt-idp1616080" id="nt-idp1616080">10</a>. RFC 4949: Internet Security Glossary, Version 2 &lt;<a href="http://tools.ietf.org/html/rfc4949">http://tools.ietf.org/html/rfc4949</a>&gt;.</p><p><a name="nt-idp1670592" id="nt-idp1670592">11</a>. XEP-0086: Error Condition Mappings &lt;<a href="http://xmpp.org/extensions/xep-0086.html">http://xmpp.org/extensions/xep-0086.html</a>&gt;.</p><p><a name="nt-idp1693248" id="nt-idp1693248">12</a>. XEP-0324: Internet of Things - Provisioning &lt;<a href="http://xmpp.org/extensions/xep-0324.html">http://xmpp.org/extensions/xep-0324.html</a>&gt;.</p><p><a name="nt-idp1717872" id="nt-idp1717872">13</a>. The Internet Assigned Numbers Authority (IANA) is the central coordinator for the assignment of unique parameter values for Internet protocols, such as port numbers and URI schemes. For further information, see &lt;<a href="http://www.iana.org/">http://www.iana.org/</a>&gt;.</p><p><a name="nt-idp1724208" id="nt-idp1724208">14</a>. XEP-0068: Field Data Standardization for Data Forms &lt;<a href="http://xmpp.org/extensions/xep-0068.html">http://xmpp.org/extensions/xep-0068.html</a>&gt;.</p></div><hr /><a name="appendix-revs" id="appendix-revs"></a><h3>Appendix H: Revision History</h3><p>Note: Older versions of this specification might be available at <a href="http://xmpp.org/extensions/attic/">http://xmpp.org/extensions/attic/</a></p><div class="indent"><h4>Version Draft of 0.0.3 (2014-03-19)</h4><div class="indent">
 		<p class="" style="">
-			Second draft. Includes more information about used 
-			and required features of core XMPP, a simple sequence diagram 
-			describing an example use case, and details about 
-			authentication factors. Use case about authenticating with a
-			random string was added. Also Sanna's and Seppo's birthdays!
+			Third draft. 
+			Title and abstract modified, 
+			typos corrected	and added, 
+			details and another figure added to 
+			examples. Kosti's birthday!
+		</p>
+	 (tuv)
+    </div><h4>Version 0.0.2 (2014-02-04)</h4><div class="indent">
+		<p class="" style="">
+			Second draft. 
+			Includes more information about used and required features 
+			of core XMPP, 
+			a simple sequence diagram describing an example use case, 
+			and details about authentication factors. 
+			Use case about authenticating with a random string was added. 
+			Also Sanna's and Seppo's birthdays!
 		</p>
 	 (tuv)
     </div><h4>Version 0.0.1 (2013-12-19)</h4><div class="indent"><p class="" style="">First draft.</p> (tuv)
