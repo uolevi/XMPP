@@ -10,18 +10,14 @@
 <xep>
 <header>
  
-  <title>Two-factor user authentication with a shared secret</title>
+  <title>Transmitting authentication factor information using Ad-Hoc Commands</title>
  
-  <abstract>This document specifies a two-factor authentication mechanism.  
-  Authentication mechanisms enables checking if a XMPP account exists,
-  if it knows verifier's full JID, and if it possess a shared secret 
-  inside certain device or application inside a certain time-window.
-  Authentication is based on transmitting a random string,
-  Time-Based One-time Password (TOTP) or One-time pad using ad-hoc commands. 
+  <abstract>This document specifies how to use Ad-Hoc Commands to transmit 
+  information used in two-factor authentication. 
   </abstract>
   
   <legal>
-    <copyright>This XMPP Extension Protocol is copyright (c) 1999 - 2013 by the XMPP Standards Foundation (XSF).</copyright>
+    <copyright>This XMPP Extension Protocol is copyright (c) 1999 - 2014 by the XMPP Standards Foundation (XSF).</copyright>
     <permissions>Permission is hereby granted, free of charge, to any person obtaining a copy of this specification (the &quot;Specification&quot;), to make use of the Specification without restriction, including without limitation the rights to implement the Specification in a software program, deploy the Specification in a network service, and copy, modify, merge, publish, translate, distribute, sublicense, or sell copies of the Specification, and to permit persons to whom the Specification is furnished to do so, subject to the condition that the foregoing copyright notice and this permission notice shall be included in all copies or substantial portions of the Specification. Unless separate permission is granted, modified works that are redistributed shall not contain misleading information regarding the authors, title, number, or publisher of the Specification, and shall not claim endorsement of the modified works by the authors, any organization or project to which the authors belong, or the XMPP Standards Foundation.</permissions>
     <warranty>## NOTE WELL: This Specification is provided on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. In no event shall the XMPP Standards Foundation or the authors of this Specification be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Specification or the implementation, deployment, or other use of the Specification. ##</warranty>
     <liability>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall the XMPP Standards Foundation or any author of this Specification be liable for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising out of the use or inability to use the Specification (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if the XMPP Standards Foundation or such author has been advised of the possibility of such damages.</liability>
@@ -45,16 +41,32 @@
     <jid>uolevi@gmail.com</jid>
   </author>
   <revision>
-    <version>Draft of 0.0.2</version>
+    <version>Draft of 0.0.3</version>
+    <date>2014-03-19</date>
+    <initials>tuv</initials>
+    <remark>
+		<p>
+			Third draft. 
+			Title and abstract modified, 
+			typos corrected	and added, 
+			details and another figure added to 
+			examples. Kosti's birthday!
+		</p>
+	</remark>
+  </revision>
+  <revision>
+    <version>0.0.2</version>
     <date>2014-02-04</date>
     <initials>tuv</initials>
     <remark>
 		<p>
-			Second draft. Includes more information about used 
-			and required features of core XMPP, a simple sequence diagram 
-			describing an example use case, and details about 
-			authentication factors. Use case about authenticating with a
-			random string was added. Also Sanna's and Seppo's birthdays!
+			Second draft. 
+			Includes more information about used and required features 
+			of core XMPP, 
+			a simple sequence diagram describing an example use case, 
+			and details about authentication factors. 
+			Use case about authenticating with a random string was added. 
+			Also Sanna's and Seppo's birthdays!
 		</p>
 	</remark>
   </revision>
@@ -65,39 +77,256 @@
     <remark><p>First draft.</p></remark>
   </revision>
 </header>
+
 <section1 topic='Introduction' anchor='intro'>
 	<p>
-		This document offers mechanisms to solve the following problem: 
-		There are two XMPP client entities (Verifier and Prover). The 
-		Verifier can be presenting e.g., a physical device, an application 
-		or a service and and the Prover is presenting an XMPP account of 
-		user entity (e.g., a human) that wants to login.
+		Two-factor authentication is used, e.g., in web services 
+		such as online banking, social networks and email to offer
+		additional level for security of authentication procedure.	
 		
-		The Prover MUST be authenticated before the Verifier can execute 
-		or ask executing any access control mechanism, e.g., to check if
-		the Prover's XMPP account is authorized use certain resource(s). 
-		We present usage of two-factor authentication in which the following
-		authentication factors are used:
+		There exists no XMPP extension protocol describing how to 
+		transmit information related to additional authentication factors.
+		
+		Two-factor authentication requires the use of two of the three 
+		authentication factors.
+		
+		These three factors are 
+		a knowledge factor 
+		 meaning something only the user knows (passwords, PINs), 
+		a possession factor 
+		 meaning something only the user has (smart cards, phones, tokens), and 
+		a inherence factor 
+		 meaning something only the user is (biometrics).
+	</p>
+	<p>
+		Entities in this document are 
+		two XMPP client applications (of Verifier and Prover),
+		two XMPP account (Verifier and Prover), 
+		XMPP server(s) of these two accounts,
+		and users of these two accounts.
+	</p>
+	<p>
+		Verifier's XMPP account logins from Verifier XMPP client,
+		automatically using existing credentials.
+		
+		A human user logins using his/her credentials from 
+		the Prover client.
+		
+		The Verifier XMPP client authenticates (the user of) the Prover 
+		by checking if the Prover is able to transmit a shared secret 
+		to the Verifier, using described ad-hoc commands.
+	</p>
+	<p>
+		This document describes authentication mechanisms which can be
+		used for checking, e.g., 
+		<ul>
+		<li>if used Prover's XMPP account exists,</li>
+		<li>if user of Prover's XMPP account knows or have required 
+		credentials to login to this account,</li>
+		<li>if the Prover and the Verifier XMPP accounts login from certain XMPP clients,</li>
+		<li>if the Prover's XMPP client knows full JID of the Verifier account in a certain XMPP client, and</li>
+		<li>if user of the Prover XMPP client, the Prover XMPP client, or some other
+			entity is able to access to a shared secret and provide
+			it using the Prover XMPP client during a wanted time window.</li>
+		</ul>
+		 
+		 This shared secret MAY be transmitted and/or stored, e.g.,
+		 <ul>
+			<li>to a trusted platform module (TPM) of certain device,</li>
+			<li>to certain smart card (such as SIM), or</li>
+			<li>to a certain application in certain device.</li>
+		</ul>
+		
+		In other words, the user the user or some other entity 
+		participating to the authentication procedure MUST have or have 
+		access something (where the secret is transmitted and/or stored).
+		This means that the possession factor is present.
+		
+		At the moment, this document describes transmitting 
+		a random string, 
+		a Time-Based One-time Password (TOTP) or 
+		a One-time pad 
+		using XMPP's Ad-Hoc Commands, and using them for authentication.
+	</p>
+	<p>
+		This document offers mechanisms to be used, e.g., in the 
+		following scenarios:
+	</p>
+	<p>
+	<ul>
+		<li>
+			Romeo rents a bike from a rental store.
+			
+			Access control of the bike is based on XMPP and an SMS, so	
+			Romeo tells his XMPP account JID and phone number to a 
+			merchant.
+			
+			Romeo installs store's bike application to his smart phone.
+
+			The application enables 
+			pairing of the smart phone with sensors connected to the bike, 
+			unlocking bike's electric motor, and 
+			publishing information from the bike to different services 
+			 such as to rental store's web service.
+			
+			The merchant adds Romeo's account to the list of paid 
+			customers for a fixed time and maps his phone number to
+			certain bike application.
+			
+			Romeo starts the application, logins to his XMPP account, 
+			gets a password in an SMS to his phone, enters it 
+			to a form in the application, is authenticated and 
+			authorized (during the fixed time) to start the motor in 
+			the electric bike. 
+			
+			For the privacy reasons, the store does not publish location 
+			of Romeo's account (in this scenario a Prover) but account 
+			of their bike (a Verifier), and so all traffic from 
+			the phone comes from the Verifier to their services.
+			
+			Romeo asks the merchant to add Julia's JID to be able to
+			access location of the bike he rented.
+			
+			Rental store's security policies allow only their own 
+			applications to access to their services. 
+
+			<ul><li>
+			In this scenario, Romeo's XMPP credentials can be thought 
+			of as a knowledge factor.	
+			
+			SIM card is a possession factor, without
+			it Romeo would not get the required password. Password 
+			received to the SIM and inserted to the application, 
+			again, is certainly a knowledge factor, because Romeo knows
+			it. <!--Hmmm??.... difficult-->
+			
+			PIN which is used to open the SIM could be thought of as a 
+			knowledge factor but it does not really relate to this 
+			scenario.		
+			
+			The bike application can be thought of to be another
+			possession factor. Romeo has to possess the 
+			application	but does not have to know anything related to it.
+			Verifier's credentials stored in the bike application are not 
+			known by Romeo.
+			</li></ul>
+		</li>
+		<li>
+			Julia has installed rental stores' map application which 
+			shows locations of certain bikes (XMPP accounts) in a map, 
+			to her smart phone.
+			
+			She has received a Bluetooth dongle from the store to be used
+			in the authentication procedure. She has paired it with her
+			phone and bike application. Dongle has a button which has 
+			to be pressed when someone logins from the application.
+
+			Julia starts the application, logins to her XMPP account, 
+			presses the flashing button in the dongle, is 
+			authenticated, and authorized to access the location of the
+			bike Romeo has rented.
+
+			She hurries to Romeo's current location.
+			
+			<ul><li>
+			In this scenario Julia's XMPP credentials can be thought of 
+			as a knowledge factor.	
+			
+			The bike application is a possession factor, 
+			because	Julia does have to know anything related to it, 
+			just have and use it in her phone. 
+			
+			Dongle certainly is a possession factor without any 
+			knowledge factors, because Julia just MUST have it and 
+			press the button right after logging in. 
+			
+			Julia does not see or know a shared secret trasmitted 
+			from the Verifier to the dongle and read from dongle by the 
+			Prover.
+			
+			Verifier's credentials stored in the bike application are not 
+			known by Julia.
+			</li></ul>
+		</li>
+		<li>
+			Romeo and Julia meet. 
+			
+			Julia gives her family's USB dongle that has a LED screen 
+			and her smart phone to Romeo. 
+			
+			The smart phone has a pre-installed application 
+			to lock/unlock doors in Julia's home.
+			
+			Romeo comes outside of Julia's home.
+			
+			Sadly, he hasn't asked Julia's XMPP account's credentials
+			so he decides to login anonymously from the phone. 
+			
+			Romeo has luck, because house accepts anonymous logins, 
+			because of possible alarm situations.
+			
+			USB dongle shows a password. 
+			
+			Romeo enters the password to a form of the application in
+			the Julia's smart phone. 
+
+			Anonymous XMPP account is correctly authenticated 
+			(so it was correctly logged in from the correct application 
+			in correct phone 
+			and Romeo has access to the Julia's 
+			family's USB dongle), 
+			but sadly anonymous XMPP account is not authorized 
+			to use the door unlocking mechanisms because there is no
+			alarm present in the house.  
+
+			So... Romeo cannot visit Julia secretly during 
+			this night.
+			
+			<ul><li>
+			Here Julia's XMPP credentials can be thought of as knowledge 
+			factors.
+
+			Dongle is a possession factor, but
+			a password presented by the dongle, on the other hand, can be
+			thought of as a knowledge factor.
+			
+			Bike application is a possession factor.
+			Romeo does not have any knowledge related to it.
+			</li></ul>
+		</li>
+	</ul>
+	</p>
+	<p>
+		The Prover SHOULD be authenticated before the Verifier can 
+		execute or ask executing any access control mechanism, e.g., to 
+		check if the Prover's XMPP account is authorized use certain 
+		resource(s). 
+		The following factors have been used:
 	</p>
 	<ul>
 		<li>
-			A knowledge factor that means something only the user knows. 
-			In this application this knowledge are a shared secret known 
-			only by the Prover and Verifier, and a full JID of the 
-			Verifier. A secret, or a password calculated from 
-			this secret MUST be sent to this full JID.
+			The first factor is a knowledge factor. 
+			Knowledge factors here could be 
+			a shared secret known only by the Prover and Verifier, 
+			knowing the correct and used authentication mechanisms,
+			and a full JID of the Verifier. 
+			A secret, or a password calculated from 
+			the shared secret MUST be sent to only this full JID using 
+			the	described ad-hoc commands.
 
 			Notice that	Prover's XMPP account's username and password 
 			are not necessarily used as knowledge factors, if, e.g., 
 			mechanisms presented in &xep0175; are used.
 		</li>
 		<li>
-			The second factor is a possession factor that means some 
-			entity only	the user has or is able to access. This entity 
-			COULD be, e.g., a device or application that the user wants 
-			to use, or an external device showing the shared secret to 
-			the user. The shared secret MUST be transmitted only
-			to this certain entity, that the Prover is able to access.
+			The second factor is a possession factor. This entity 
+			COULD be, e.g., a device or application that the user has, 
+			or an external device showing the secret or the password to 
+			the user.
+			
+			The shared secret MUST be transmitted only
+			to this certain entity, e.g., with SMS to certain mobile 
+			phone number (SIM card), that the Prover is able to access.
 		</li>
 	</ul>
 	<p>
@@ -110,93 +339,191 @@
 		Prover is Local Client and Verifier is Remote Client.
 	</p>
 	<p>
-		Several mechanisms for client-to-client authentication, such as 
-		&xep0250; exist and some of them SHOULD be used with the protocol 
-		defined in this document. This document describes a new simple and 
-		extendable protocol for two-factor one-way client authentication 
-		by specifying a profile on &xep0050;. One-way here means that 
-		the actual user (e.g, a human) of Prover's XMPP Client is not 
-		required to authenticate the Verifier.
+		Several mechanisms for client-to-client (C2C) authentication, such as 
+		&xep0250; exist and at least one of them SHOULD be used with the 
+		protocol defined in this document.
+		Read more from <link url='#security'>Securityn</link> section.
 	</p>
-	<section2 topic='Simplified example sequence' anchor='example-seq'>
 	<p>
-	<example caption='Simplified example sequence with clients in two 
-	different domains' anchor='example1'><![CDATA[
+		This document describes a new simple and extendable protocol 
+		for transmitting information to be used in two-factor one-way 
+		client authentication by specifying a profile on &xep0050;. 
+		One-way here means that the actual user (e.g, a human) of 
+		Prover's XMPP Client is not required to authenticate 
+		the Verifier.
+	</p>
+	<section2 topic='Example: Prover has access to a shared secret' anchor='example-seq1'>
+	<p>
+		The following example presents a use case enabled by this XEP. 
+		
+	<example caption='Simplified example sequence of verifying that the 
+	Prover has access to a shared secret' anchor='example1'><![CDATA[
 
-    +----------------+                  +----------------+    
-    |  Prover in     |<------(1.)------>|  XMPP server   |     
-    |   domain Y     |                  |      in        |    
-    |                |<------(6.)------>|    domain Y    |    
-    +----------------+                  +----------------+    
-        |   ^   ^                               ^             
-        |   |   |                               |             
-       (2.)(4.)(5.)                            (6.)           
-        |   |   |                               |             
-        V   |   |                               V             
-    +----------------+                  +----------------+    
-    | Verifier in    |<------(1.)------>|  XMPP server   |    
-    |   domain X     |                  |      in        |    
-    | (3.) (7.) (8.) |<------(6.)------>|    domain X    |    
-    +----------------+                  +----------------+    
+    +-----------------+                  +-----------------+    
+    |    Prover in    |<------(1.)------>|   XMPP server   |     
+    |     domain Y    |                  |       in        |    
+    |                 |<------(7.)------>|     domain Y    |    
+    +-----------------+                  +-----------------+    
+       |   ^   ^   ^                              ^             
+       |   |   |   |                              |             
+      (2.)(4.)(5.)(6.)                           (7.)           
+       |   |   |   |                              |             
+       V   |   |   |                              V             
+    +-----------------+                  +-----------------+    
+    | Verifier in     |<------(1.)------>|   XMPP server   |    
+    |   domain X      |                  |       in        |    
+    |(3.)(8.)(9.)(10.)|<------(7.)------>|     domain X    |    
+    +-----------------+                  +-----------------+    
 
 
 ]]></example>
 	</p>
 	<p>
 		<ol>
-			<li anchor='1'>Prover and Verifier login.</li>
-			<li anchor='2'>The Verifier discovers that the Prover wants 
+			<li anchor='e1-1'>The Prover and the Verifier login.</li>
+			<li anchor='e1-2'>The Verifier discovers that the Prover wants 
 			to authenticate, or access and use, e.g., certain resource, 
 			device, or service. Full JID of	the Prover is now known by 
 			the Verifier. Discovery mechanism is implementation 
 			specific and out of scope of this document.</li>
-			<li anchor='3'>The Verifier generates a secret.</li>
-			<li anchor='4'>The Verifier transmits this secret through a 
-			secure channel to the Prover, in practice, e.g, to an entity 
-			which is a device or an application the Prover is using or 
-			is able to access. This secure channel is implementation 
-			specific and out of scope of this document.</li>
-			<li anchor='5'>The Verifier transmits its own full JID through 
-			a secure channel to the Prover. This secure channel is 
-			implementation specific and out of scope of this document.</li>
-			<li anchor='6'>The Prover and the Verifier communicate using 
+			<li anchor='e1-3'>The Verifier selects an authentication
+			mechanism to be used and generates a related secret, e.g.,
+			a random string, a secret key and message for OTP, or a secret
+			key for TOTP. The Verifier MAY implement one or more 
+			authentication mechanisms presented in this document. 
+			How the mechanisms are selected are implementation specific 
+			and out of scope of this document.</li>
+			<li anchor='e1-4'>The Verifier transmits information about 
+			the used authentication mechanism through
+			a secure channel to the Prover. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
+			<li anchor='e1-5'>The Verifier transmits its own full JID 
+			through a secure channel to the Prover. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
+			<li anchor='e1-6'>The Verifier transmits the secret through 
+			a secure channel to the Prover or to an entity 
+			which Prover or user of the Prover has to be able to access. 
+			This secure channel is implementation specific and out of 
+			scope of this document.</li>
+			<li anchor='e1-7'>The Prover and the Verifier communicate using 
 			ad-hoc commands presented in this document, and the secret is 
 			transmitted from Prover to the Verifier.
 			</li>
-			<li anchor='7'>The Verifier checks the sender and content in 
+			<li anchor='e1-8'>The Verifier checks the sender and content in 
 			ad-hoc commands. If the secret is correct and the sender's 
 			full JID is same as	Prover's full JID received in 
-			<link url='#2'>step (2.)</link>, the Verifier can be sure that 
+			<link url='#e1-2'>step (2.)</link>, the Verifier can be sure that 
 			the Prover has access to the entity described in 
-			<link url='#4'>(step 4.)</link> and knows Verifier's full JID 
-			transmitted in <link url='#5'>(step 5.)</link>.</li>
-			<li anchor='8'>The Verifier MAY start executing
+			<link url='#e1-5'>(step 5.)</link> and knows Verifier's full JID 
+			transmitted in <link url='#e1-6'>(step 6.)</link>.</li>
+			<li anchor='e1-9'>The Verifier MAY start executing
 			internal or external access control procedures which are 
 			shortly	discussed in <link url='#rules'>Business rules</link> 
 			section. Various access control procedures MAY be executed 
 			also during the authentication procedure to, e.g., enable 
 			only certain JIDs to be able to authenticate.</li>
+			<li anchor='e1-10'>Based on the access control rules,
+			the user of the Prover client MAY be 
+			authorized to access or start a wanted resource, service, 
+			or device.
+			</li>
 		</ol>
 	</p>
 	<p>
-		Notice that it is possible that there is only one domain, so 
-		both Prover and Verifier are, e.g., in domain X in the 
+		When talking about transmitting information to the Prover using 
+		a secure channel, in practice, this information is transmitted 
+		to an entity which is a device or an application the Prover is 
+		using or executed in, or a device or application the 
+		authenticated user or the Prover are able to access. 
+		Examples of such devices and applications are 
+		trusted platform modules (TPM) and SIM cards,
+		smart phones, USB tokens or tokens with a display.  
+		Example secure channels MAY be, e.g., SMS, writing and reading
+		to/from TPM, and installing a correctly signed application able
+		to calculate the current secret.
+	</p>
+	<p>
+		Steps 4., 5., and 6. MAY be implemented to be executed simultaneously
+		and using the same secure channel, but they MAY be executed also
+		in different steps using different secure channels.
+	</p>
+	<p> 
+		 Notice that it is possible that there is only one domain, so 
+		 both Prover and Verifier would be, e.g., in domain X. 
+	</p>	
+	</section2>
+	<section2 topic='Example: User has access to the 
+	shared secret' anchor='example-seq2'>
+	<p>
+		The following sequence diagram presents the same use case as
+		example 1 but a bit differently (XMPP servers are not presented
+		in the figure and steps 1. and 6. have more details and step 10. 
+		is presented as starting the wanted resource, service or device.
+	</p>
+ 
+	<example caption='Sequence diagram use case of verifying 
+	that user has access to the shared secret' anchor='example2'><![CDATA[
+
+
+  User            Prover         Verifier         Location      A resource, 
+ (person)         client          client        of the secret    a service,
+    |               |                |               |          or a device
+    |     (1a.)    (1b.)            (1c.)            |              |
+    |-------------->|      (2.)      |               |              |
+    |               |--------------->|               |              |
+    |               |               (3.)             |              |
+    |               |   (4.)(5.)     |               |              |
+    |               |<---------------|               |              |
+    |               |                |      (6a.)    |              |
+    |               |                |-------------->|              |
+    |               |      (6b.)     |               |              |
+    |<---------------------------------------------->|              |
+    |     (6c.)     |                |               |              |
+    |-------------->|      (7.)      |               |              |
+    |               |<-------------->|               |              |
+    |               |               (8.)             |              |
+    |               |               (9.)             |              |
+    |               |                |               |            (10.)
+    
+    
+]]></example>
+	<p>
+		All other steps but 1. and 6. are the same as in 
 		<link url='#example1'>example 1</link>.
+	</p>
+	<p>
+	    <link url='#e1-1'>Step 1. of example 1.</link> is divided into 
+	    three cases: 
+	    In (1a.) the user inputs his/her XMPP account's credentials 
+	    (such as JID and password) to the Prover client login screen, 
+	    in (1b.) the Prover client logins and 
+	    in (1c.) that the Verifier client logins.
+	</p>
+	<p>
+	   <link url='#e1-6'>Step 6. of example 1.</link> is divided into 
+	    three cases:
+	    In (6a.) the shared secret is transmitted through a secure channel
+	    to an external entity (e.g., with an SMS to a SIM card),
+	    in (6b.) the user reads the secret from this external entity, and
+	    in (6c.) the user inputs the secret to the Prover's to be used
+	    in ad-hoc commands forms.
 	</p>
 	</section2>
 </section1>
 
 <section1 topic='Requirements' anchor='reqs'>
     <p>This document addresses the following requirements:</p>
-    <ul>
+    <ol>
         <li>Enable the Verifier entity to perform authentication of 
         their users (e.g., humans) by verifying that a Prover entity 
         holds a shared secret.</li>
 		<li>Verifier's and Prover's XMPP accounts do not necessarily need
 		to know each other before starting the authentication procedure
-		nor be in each rosters.</li>
+		nor be in rosters of each other.</li>
         <li>Re-use existing XMPP and Jabber protocols wherever possible.</li>
-    </ul>
+    </ol>
 </section1>
     
     
@@ -221,21 +548,33 @@
   </p>
   <dl>
     <di><dt>HMAC</dt><dd>Keyed-Hashing for Message Authentication</dd></di>
+  
     <di><dt>HMAC-SHA-256</dt><dd>HMAC-SHA-256 is the realization of the 
     HMAC message authentication code using the SHA-256 hash function.</dd></di>
+  
     <di><dt>HMAC-SHA-512</dt><dd>HMAC-SHA-512 is the realization of the 
     HMAC message authentication code using the SHA-512 hash function.</dd></di>
+  
     <di><dt>HOTP</dt><dd>HMAC-Based One-Time Password Algorithm</dd></di>
+  
     <di><dt>Local Client</dt><dd>An XMPP client that wants to authenticate 
     itself to Remote Client.</dd></di>
+   
     <di><dt>One-time pad</dt><dd>Example of perfectly secret encryption scheme.</dd></di>
+  
     <di><dt>OTP</dt><dd>A one-time password is a password that is valid 
     for only one login session or transaction.</dd></di>
+  
     <di><dt>Prover</dt><dd>Same as Local Client.</dd></di>
+  
     <di><dt>Remote Client</dt><dd>An XMPP client that authenticates Local Client.</dd></di>
+  
     <di><dt>SHA</dt><dd>US Secure Hash Algorithms</dd></di>
+   
     <di><dt>Time-window</dt><dd>Lenght of time when the secret is valid.</dd></di>
+   
     <di><dt>TOTP</dt><dd>Time-Based One-Time Password Algorithm</dd></di>
+  
     <di><dt>Verifier</dt><dd>Same as Remote Client.</dd></di>
   </dl>
 </section1>
@@ -249,11 +588,13 @@
         <li>Authenticate with a random string</li>
         <li>Authenticate with a Time-Based One-Time Password (TOTP)</li>
         <li>Authenticate with a One-time pad</li>
+        <li>Authenticate with...</li>
     </ol>
 	<p>
 		Although this document aims to define common use cases for 
 		authentication,	an implementation or deployment MAY support any 
-		subset and MAY support additional commands not defined herein.
+		subset and MAY support additional authentication mechanisms
+		and ad-hoc commands not defined herein.
 	</p>
     <p>
 		<em>Note: The text that follows assumes that implementors have 
@@ -278,8 +619,8 @@
 			during a certain time-window. 
 		</p>
 		<example caption='Local Client (Prover) requests to authenticate with a random string to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-random-1'
     xml:lang='en'>
@@ -296,8 +637,8 @@
         
    
         <example caption='Remote Client (Verifier) replies with a form to set a random string'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-random-1'
     xml:lang='en'>
@@ -319,9 +660,15 @@
   </command>
 </iq>
         ]]></example>
+        <p>
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user. If the form is presented, the user inputs the 
+			random string to it. Otherwise the Prover client inserts the
+			random string to the form automatically. 
+        </p>
         <example caption='Local Client (Prover) submits the random string form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-random-2'
     xml:lang='en'>
@@ -341,8 +688,8 @@
 			of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-random-2'
     xml:lang='en'>
@@ -366,8 +713,8 @@
 			the counter in the HOTP computation.
 		</p>
 		<example caption='Local Client (Prover) requests to authenticate with a TOTP to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-totp-1'
     xml:lang='en'>
@@ -383,8 +730,8 @@
 		</p>
         
         <example caption='Remote Client (Verifier) replies with a form to set a TOTP'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-totp-1'
     xml:lang='en'>
@@ -406,9 +753,13 @@
   </command>
 </iq>
         ]]></example>
+        <p>
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user.
+        </p>
         <example caption='Local Client (Prover) submits the TOTP secret form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-totp-2'
     xml:lang='en'>
@@ -428,8 +779,8 @@
 			Prover of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-totp-2'
     xml:lang='en'>
@@ -456,7 +807,7 @@
 		<p>
 			Notice that if there is not any additional understandable 
 			and confidential information to be encrypted between Prover 
-			and	Verifier, there is no benefits of using One-time pad 
+			and	Verifier, there are no benefits of using One-time pad 
 			instead of a <link url="#set-random">random string</link>.
 		</p>
 		<p>
@@ -464,8 +815,8 @@
 			during a certain time-window. 
 		</p>
 		<example caption='Local Client (Prover) requests to authenticate with a One-time pad to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-otpad-1'
     xml:lang='en'>
@@ -482,8 +833,8 @@
         
    
         <example caption='Remote Client (Verifier) replies with a form to set a One-time pad'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-otpad-1'
     xml:lang='en'>
@@ -505,9 +856,13 @@
   </command>
 </iq>
         ]]></example>
+        <p>
+			Prover receives the form and MAY or MAY NOT present it to 
+			the user.
+        </p>        
         <example caption='Local Client (Prover) submits the One-time pad form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/chamber'
-    to='juliet@example.com/balcony'
+<iq from='juliet@example.com/prover'
+    to='juliet@example.com/verifier'
     type='set'
     id='set-otpad-2'
     xml:lang='en'>
@@ -523,12 +878,12 @@
 </iq>
         ]]></example>
         <p>
-			After receiving a One-time pad, the Verifier informs Prover 
-			of completion.
+			After receiving a One-time pad, the Verifier informs the 
+			Prover of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/balcony' 
-    to='juliet@example.com/chamber' 
+<iq from='juliet@example.com/verifier' 
+    to='juliet@example.com/prover' 
     type='result' 
     id='set-otpad-2'
     xml:lang='en'>
@@ -600,8 +955,8 @@
 		There are several secure ways to transmit the random string, 
 		One-time pads or the shared secret that is used in TOTP from 
 		Verifier to the Prover. As described in 
-		<link url="#example1">example 1.</link>, description of the
-		secure channel is out of scope of this document. 
+		<link url='#example1'>example 1.</link>, descriptions of all
+		secure channels are out of scope of this document. 
 		As an example, if both Verifier and Prover entities are running 
 		in one application inside one device, the shared secret can be 
 		generated and transmitted inside running implementation and be 
@@ -664,7 +1019,7 @@
 	</ul>
 	<p>
 		In each case, the Verifier MAY check Prover's JID right after 
-		receiving an ad-hoc command or after a succesful authentication 
+		receiving an ad-hoc command or after a successful authentication 
 		process. 
 	</p>
 	<p>
@@ -672,7 +1027,7 @@
 		reply with &forbidden; error message.
 	</p>
 	<p>
-		After the a succesful verification the Verifier can, e.g.,
+		After the a successful verification the Verifier can, e.g.,
 	</p>
 	<ul>
 		<li>start the wanted process,</li>
@@ -683,10 +1038,17 @@
 	</section1>
 <section1 topic='Security Considerations' anchor='security'>
 	<p>
+		If both the Prover and the Verifier are not	using the same 
+		trusted XMPP server or are not using authenticated and encrypted
+		client-to-server or server-to-server (S2S) connections, end-to-end
+		C2C security MUST be established between the Prover and the Verifier,
+		e.g., by using <cite>XEP-0250</cite>.
+	</p>
+	<p>
 		In this protocol, the resourcepart of a JID is a required 
 		identifier to uniquely identify a specific connection or object 
 		belonging to the entity associated with an XMPP localpart at a 
-		domain. Without an unique resourcepart, ad-hoc commands do not 
+		domain. Without a unique resourcepart, ad-hoc commands do not 
 		necessarily go to correct entities.
 	</p>
 	<p>
@@ -738,7 +1100,7 @@
 		anything about the Verifier. The Prover XMPP client will know 
 		Verifiers full JID, but it is not necessarily told to the 
 		human user. In addition to this, the user does not necessarily 
-		know what the device or the application will do after a succesful 
+		know what the device or the application will do after a successful 
 		authentication. Notice that this problem relates to every 
 		closed source XMPP client implementations, thus implementations'
 		code SHOULD be open source.
@@ -799,7 +1161,9 @@
 
 <section1 topic='Acknowledgements' anchor='ack'>
 	<p>
-		Thanks to Kimmo Halunen, Sami Lehtonen, Kevin, Sergey Dobrov and Elina for all valuable feedback.
+		Thanks to Kimmo Halunen, Sami Lehtonen, Jouni Hiltunen, 
+		Dave Cridland, Kevin, Sergey Dobrov, and Elina for all 
+		questions and valuable feedback.
 	</p>
 </section1>
 
