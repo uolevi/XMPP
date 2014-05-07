@@ -41,7 +41,20 @@
     <jid>uolevi@gmail.com</jid>
   </author>
   <revision>
-    <version>Draft of 0.0.3</version>
+    <version>Draft of 0.0.4</version>
+    <date>2014-03-21</date>
+    <initials>tuv</initials>
+    <remark>
+		<p>
+			Fourth draft. 
+			Example messages modified. Other Julia is now the Verifier
+			and resource fields are Universally Unique IDentifiers 
+			(UUIDs)
+		</p>
+	</remark>
+  </revision>  
+  <revision>
+    <version>0.0.3</version>
     <date>2014-03-19</date>
     <initials>tuv</initials>
     <remark>
@@ -458,7 +471,7 @@
 	shared secret' anchor='example-seq2'>
 	<p>
 		The following sequence diagram presents the same use case as
-		example 1 but a bit differently (XMPP servers are not presented
+		example 1 but a bit differently. XMPP servers are not presented
 		in the figure and steps 1. and 6. have more details and step 10. 
 		is presented as starting the wanted resource, service or device.
 	</p>
@@ -615,12 +628,18 @@
 			dependent upon the preceding value in the sequence. &rfc4949;
 		</p>
 		<p>
+			Example's resource fields are version 1 Universally Unique 
+			IDentifiers (UUIDs) that are based on the host ID and
+			the current time &rfc4122;.
+		</p>
+		<p>
 			It is possible to enable random string to be valid only 
 			during a certain time-window. 
 		</p>
-		<example caption='Local Client (Prover) requests to authenticate with a random string to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+		<example caption='Local Client (Prover) requests to authenticate 
+		with a random string to a Remote Client (Verifier)'><![CDATA[
+<iq from='juliet@example.com/6443c73c-b113-11e3-96ea-08002743a6b5'
+    to='verifier@example.com/8e22eeca-b113-11e3-96ea-08002743a6b5'
     type='set'
     id='set-random-1'
     xml:lang='en'>
@@ -637,8 +656,8 @@
         
    
         <example caption='Remote Client (Verifier) replies with a form to set a random string'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/8e22eeca-b113-11e3-96ea-08002743a6b5' 
+    to='juliet@example.com/6443c73c-b113-11e3-96ea-08002743a6b5' 
     type='result' 
     id='set-random-1'
     xml:lang='en'>
@@ -667,8 +686,8 @@
 			random string to the form automatically. 
         </p>
         <example caption='Local Client (Prover) submits the random string form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+<iq from='juliet@example.com/6443c73c-b113-11e3-96ea-08002743a6b5'
+    to='verifier@example.com/8e22eeca-b113-11e3-96ea-08002743a6b5'
     type='set'
     id='set-random-2'
     xml:lang='en'>
@@ -688,8 +707,8 @@
 			of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/8e22eeca-b113-11e3-96ea-08002743a6b5' 
+    to='juliet@example.com/6443c73c-b113-11e3-96ea-08002743a6b5' 
     type='result' 
     id='set-random-2'
     xml:lang='en'>
@@ -712,9 +731,14 @@
 			factor. In TOTP, time reference and a time step replaces 
 			the counter in the HOTP computation.
 		</p>
+		<p>
+			Example's resource fields are version 4 of UUIDs which 
+			are generated from truly-random or pseudo-random numbers.
+			<cite>RFC 4122</cite>
+		</p>
 		<example caption='Local Client (Prover) requests to authenticate with a TOTP to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+<iq from='juliet@example.com/c2b54326-ed20-4193-97a7-daa2ba79a4c1'
+    to='verifier@example.com/62de3f09-ae74-4074-8fbe-9a9d56f62033'
     type='set'
     id='set-totp-1'
     xml:lang='en'>
@@ -730,8 +754,8 @@
 		</p>
         
         <example caption='Remote Client (Verifier) replies with a form to set a TOTP'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/62de3f09-ae74-4074-8fbe-9a9d56f62033' 
+    to='juliet@example.com/c2b54326-ed20-4193-97a7-daa2ba79a4c1' 
     type='result' 
     id='set-totp-1'
     xml:lang='en'>
@@ -758,8 +782,8 @@
 			the user.
         </p>
         <example caption='Local Client (Prover) submits the TOTP secret form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+<iq from='juliet@example.com/c2b54326-ed20-4193-97a7-daa2ba79a4c1'
+    to='verifier@example.com/62de3f09-ae74-4074-8fbe-9a9d56f62033'
     type='set'
     id='set-totp-2'
     xml:lang='en'>
@@ -779,8 +803,8 @@
 			Prover of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/62de3f09-ae74-4074-8fbe-9a9d56f62033' 
+    to='juliet@example.com/c2b54326-ed20-4193-97a7-daa2ba79a4c1' 
     type='result' 
     id='set-totp-2'
     xml:lang='en'>
@@ -811,12 +835,18 @@
 			instead of a <link url="#set-random">random string</link>.
 		</p>
 		<p>
+			Example's Verifier's resource field is a random UUID 
+			(version 4 UUID) and 
+			Prover's resource field is a UUID based on the host ID
+			and the current time (version 1 UUID).
+		</p>
+		<p>
 			It is possible to enable One-time pad to be valid only 
 			during a certain time-window. 
 		</p>
 		<example caption='Local Client (Prover) requests to authenticate with a One-time pad to a Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+<iq from='juliet@example.com/824e54d4-b115-11e3-96ea-08002743a6b5'
+    to='verifier@example.com/e84b921d-819a-4509-9c58-561c1bd2b494'
     type='set'
     id='set-otpad-1'
     xml:lang='en'>
@@ -833,8 +863,8 @@
         
    
         <example caption='Remote Client (Verifier) replies with a form to set a One-time pad'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/e84b921d-819a-4509-9c58-561c1bd2b494' 
+    to='juliet@example.com/824e54d4-b115-11e3-96ea-08002743a6b5' 
     type='result' 
     id='set-otpad-1'
     xml:lang='en'>
@@ -861,8 +891,8 @@
 			the user.
         </p>        
         <example caption='Local Client (Prover) submits the One-time pad form to Remote Client (Verifier)'><![CDATA[
-<iq from='juliet@example.com/prover'
-    to='juliet@example.com/verifier'
+<iq from='juliet@example.com/824e54d4-b115-11e3-96ea-08002743a6b5'
+    to='verifier@example.com/e84b921d-819a-4509-9c58-561c1bd2b494'
     type='set'
     id='set-otpad-2'
     xml:lang='en'>
@@ -882,8 +912,8 @@
 			Prover of completion.
 		</p>
         <example caption='Remote Client (Verifier) informs Local Client (Prover) of completion'><![CDATA[
-<iq from='juliet@example.com/verifier' 
-    to='juliet@example.com/prover' 
+<iq from='verifier@example.com/e84b921d-819a-4509-9c58-561c1bd2b494' 
+    to='juliet@example.com/824e54d4-b115-11e3-96ea-08002743a6b5' 
     type='result' 
     id='set-otpad-2'
     xml:lang='en'>
@@ -1049,7 +1079,10 @@
 		identifier to uniquely identify a specific connection or object 
 		belonging to the entity associated with an XMPP localpart at a 
 		domain. Without a unique resourcepart, ad-hoc commands do not 
-		necessarily go to correct entities.
+		necessarily go to correct entities. In example messages, random
+		and UUIDs and UUIDs based on the host ID and current time
+		have been used as defined in <cite>RFC 4122</cite> to ensure 
+		uniqueness.
 	</p>
 	<p>
 		Mechanisms for determining when a command can be executed based 
