@@ -1,0 +1,514 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>XEP-xxxx: Two-factor user authentication with a shared secret</title><link rel="stylesheet" type="text/css" href="../xmpp.css" /><link href="../prettify.css" type="text/css" rel="stylesheet" /><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" /><script type="text/javascript" src="../prettify.js"></script><meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=2.0" /><meta name="DC.Title" content="Two-factor user authentication with a shared secret" /><meta name="DC.Creator" content="Teemu V&#xE4;is&#xE4;nen" /><meta name="DC.Description" content="This document specifies a two-factor authentication mechanism to check if a XMPP account exists and if it is trying to use or access services or resources of certain device, application or service. Authentication mechanism is based on transmitting a password using Ad-Hoc Commands. Password is calculated from shared secret. " /><meta name="DC.Publisher" content="XMPP Standards Foundation" /><meta name="DC.Contributor" content="XMPP Extensions Editor" /><meta name="DC.Date" content="2013-12-19" /><meta name="DC.Type" content="XMPP Extension Protocol" /><meta name="DC.Format" content="XHTML" /><meta name="DC.Identifier" content="XEP-xxxx" /><meta name="DC.Language" content="en" /><meta name="DC.Rights" content="This XMPP Extension Protocol is copyright (c) 1999 - 2013 by the XMPP Standards Foundation (XSF)." /></head><body onload="prettyPrint()"><h1>XEP-xxxx: Two-factor user authentication with a shared secret</h1><table><tr valign="top"><td><strong>Abstract:</strong></td><td>This document specifies a two-factor authentication mechanism to check if a XMPP account exists and if it is trying to use or access services or resources of certain device, application or service. Authentication mechanism is based on transmitting a password using Ad-Hoc Commands. Password is calculated from shared secret. </td></tr><tr valign="top"><td><strong>Author:</strong></td><td>Teemu Väisänen</td></tr><tr valign="top"><td><strong>Copyright:</strong></td><td>© 1999 - 2013 XMPP Standards Foundation. <a href="#appendix-legal">SEE LEGAL NOTICES</a>.</td></tr><tr valign="top"><td><strong>Status:</strong></td><td>ProtoXEP</td></tr><tr valign="top"><td><strong>Type:</strong></td><td>Informational</td></tr><tr valign="top"><td><strong>Version:</strong></td><td>DRAFT OF 0.0.1</td></tr><tr valign="top"><td><strong>Last Updated:</strong></td><td>2013-12-19</td></tr></table><hr /><p style="color:red">WARNING: This document has not yet been accepted for consideration or approved in any official manner by the XMPP Standards Foundation, and this document is not yet an XMPP Extension Protocol (XEP). If this document is accepted as a XEP by the XMPP Council, it will be published at &lt;<a href="http://xmpp.org/extensions/">http://xmpp.org/extensions/</a>&gt; and announced on the &lt;standards@xmpp.org&gt; mailing list.</p><hr /><h2>Table of Contents</h2><div class="indent"><p><br />1.  <a href="#intro">Introduction</a><br />2.  <a href="#reqs">Requirements</a><br />3.  <a href="#disco">Discovery</a><br />4.  <a href="#glossary">Glossary</a><br />5.  <a href="#usecases">Use Cases</a><br />   
+      5.1.  <a href="#set-totp">Authenticate with a Time-Based One-Time Password (TOTP)</a><br />   
+      5.2.  <a href="#set-otpad">Authenticate with a one-time pad</a><br />6.  <a href="#errors">Error Handling</a><br />7.  <a href="#impl">Implementation Notes</a><br />8.  <a href="#rules">Business Rules</a><br />9.  <a href="#security">Security Considerations</a><br />10.  <a href="#iana">IANA Considerations</a><br />11.  <a href="#registrar">XMPP Registrar Considerations</a><br />   
+      11.1.  <a href="#registrar-protocol">Protocol Namespaces</a><br />   
+      11.2.  <a href="#registrar-formtype">Field Standardization</a><br />12.  <a href="#schema">XML Schema</a></p><p><a href="#appendices">Appendices</a><br />    <a href="#appendix-docinfo">A: Document Information</a><br />    <a href="#appendix-authorinfo">B: Author Information</a><br />    <a href="#appendix-legal">C: Legal Notices</a><br />    <a href="#appendix-xmpp">D: Relation to XMPP</a><br />    <a href="#appendix-discuss">E: Discussion Venue</a><br />    <a href="#appendix-conformance">F: Requirements Conformance</a><br />    <a href="#appendix-notes">G: Notes</a><br />    <a href="#appendix-revs">H: Revision History</a></p></div><hr /><h2>1.
+       <a name="intro" id="intro">Introduction</a></h2>
+	<p class="" style="">
+		This document offers mechanisms to solve the following problem: 
+		There are two XMPP client entities (Verifier and Prover). The 
+		Verifier can be presenting e.g., a physical device, an application 
+		or a service and and the Prover is presenting an XMPP account of 
+		user entity (e.g., a human) that wants to login.
+		
+		Before the Verifier can execute or ask executing any access 
+		control mechanism, e.g., to check if the Prover's XMPP accout is 
+		authorized use certain resource(s), the Prover must be authenticated. 
+		We present usage of two-factor authentication in which the following
+		authentication factors are used:
+	</p>
+	<ul class="" style="">
+		<li class="" style="">
+			A knowledge factor that means something only the user knows. 
+			In this application this knowledge is a shared secret known 
+			only by the Prover and Verifier, and a full JID of the 
+			Verifier where a password calculated from this secret must 
+			be sent to.
+
+			Notice that	Prover's XMPP account's username and password 
+			are not necessarily used as knowledge factors, if, e.g., 
+			mechanisms presented in <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0175.html">Best Practices for Use of SASL ANONYMOUS (XEP-0175)</a></span>  [<a href="#nt-idp25403200">1</a>] are used.
+		</li>
+		<li class="" style="">
+			The second factor is a possession factor that means something only
+			the user has, e.g., a device or application that the user 
+			wants to use. The shared secret can be told only to certain 
+			Prover XMPP account that is	running in a certain device or in
+			certain application.
+		</li>
+	</ul>
+	<p class="" style="">
+		In addition to these, described mechanism offers possibility to 
+		approve authentication inside only a certain time-slot.
+	</p>
+	<p class="" style="">
+		Prover and Verifier entities mean same as in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc6238">RFC 6238</a></span>  [<a href="#nt-idp25410784">2</a>] but are 
+		implemented as two XMPP clients. When using terms of <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0146.html">Remote Controlling Clients (XEP-0146)</a></span>  [<a href="#nt-idp25415920">3</a>],
+		Prover is Local Client and Verifier is Remote Client.
+	</p>
+	<p class="" style="">
+		Several mechanisms for client-to-client authentication, such as 
+		<span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0250.html">C2C Authentication Using TLS (XEP-0250)</a></span>  [<a href="#nt-idp26343952">4</a>] exist and can be used with the protocol defined in 
+		this document. This document describes a new simple and 
+		extendable protocol for two-factor one-way client authentication 
+		by specifying a profile on <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0050.html">Ad-Hoc Commands (XEP-0050)</a></span>  [<a href="#nt-idp26348640">5</a>]. One-way here means that 
+		the actual user (e.g, a human) of Prover's XMPP Client is not 
+		required to know anything about the Verifier.
+	</p>
+<h2>2.
+       <a name="reqs" id="reqs">Requirements</a></h2>
+    <p class="" style="">This document addresses the following requirements:</p>
+    <ul class="" style="">
+        <li class="" style="">Enable the Verifier entity to perform authentication of 
+        their users (e.g., humans) by verifying that a Prover entity 
+        holds a shared secret.</li>
+		<li class="" style="">Verifier's and Prover's XMPP accounts do not necessarily need
+		to know each other beforehand nor be contacts.</li>
+        <li class="" style="">Re-use existing XMPP and Jabber protocols wherever possible.</li>
+    </ul>
+<h2>3.
+       <a name="disco" id="disco">Discovery</a></h2>
+    <p class="" style="">
+		A client MAY advertise any authentication commands it 
+		supports via <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0030.html">Service Discovery (XEP-0030)</a></span>  [<a href="#nt-idp26361344">6</a>] (as described in <span class="ref">XEP-0050</span>).
+    </p>
+    <p class="" style="">
+		If these commands are advertised, <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0115.html">Entity Capabilities (XEP-0115)</a></span>  [<a href="#nt-idp26371520">7</a>] can be used to 
+		query capability of authentication commands in a client.
+		If the Prover and the Verifier are working on a same physical 
+		device, they both MAY know the exact format and existence of supported 
+		commands.
+    </p>
+<h2>4.
+       <a name="glossary" id="glossary">Glossary</a></h2>
+  <p class="" style="">
+	  The following table lists common terms and corresponding descriptions.
+  </p>
+  <div class="indent"><dl>
+    <di><dt><strong>HMAC</strong></dt><dd>Keyed-Hashing for Message Authentication</dd></di>
+    <di><dt><strong>HMAC-SHA-256</strong></dt><dd>HMAC-SHA-256 is the realization of the 
+    HMAC message authentication code using the SHA-256 hash function.</dd></di>
+    <di><dt><strong>HMAC-SHA-512</strong></dt><dd>HMAC-SHA-512 is the realization of the 
+    HMAC message authentication code using the SHA-512 hash function.</dd></di>
+    <di><dt><strong>HOTP</strong></dt><dd>HMAC-Based One-Time Password Algorithm</dd></di>
+    <di><dt><strong>Local Client</strong></dt><dd>An XMPP client that wants to authenticate 
+    itself to Remote Client.</dd></di>
+    <di><dt><strong>One-time pad</strong></dt><dd>Example of perfectly secret encryption scheme.</dd></di>
+    <di><dt><strong>OTP</strong></dt><dd>A one-time password is a password that is valid 
+    for only one login session or transaction.</dd></di>
+    <di><dt><strong>Prover</strong></dt><dd>Same as Local Client.</dd></di>
+    <di><dt><strong>Remote Client</strong></dt><dd>An XMPP client that authenticates Local Client.</dd></di>
+    <di><dt><strong>SHA</strong></dt><dd>US Secure Hash Algorithms</dd></di>
+    <di><dt><strong>TOTP</strong></dt><dd>Time-Based One-Time Password Algorithm</dd></di>
+    <di><dt><strong>Verifier</strong></dt><dd>Same as Remote Client.</dd></di>
+  </dl></div>
+<h2>5.
+       <a name="usecases" id="usecases">Use Cases</a></h2>
+    <p class="" style="">
+		This document defines a profile of <span class="ref">XEP-0050</span> that 
+		enables a client to perform the following tasks on a entity 
+		that or which resources it wants to use:
+	</p>
+    <ol start="" class="" style="">
+        <li class="" style="">Authenticate with a Time-Based One-Time Password (TOTP)</li>
+        <li class="" style="">Authenticate with a one-time-pad</li>
+        <li class="" style="">Authenticate with a ...</li>
+    </ol>
+	<p class="" style="">
+		Although this document aims to define common use cases for 
+		authentication,	an implementation or deployment MAY support any 
+		subset and MAY support additional commands not defined herein.
+	</p>
+    <p class="" style="">
+		<span class="em">Note: The text that follows assumes that implementors have 
+		read and understood <span class="ref">XEP-0050</span>, password 
+		generation algorithms described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4226">RFC 4226</a></span>  [<a href="#nt-idp26392736">8</a>] and <span class="ref">RFC 6238</span></span>,
+		and randomness requirements described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4086">RFC 4086</a></span>  [<a href="#nt-idp26402432">9</a>],
+		and know about one-time pads and perfect secrecy.
+	</p>
+
+    <div class="indent"><h3>5.1 <a name="set-totp" id="set-totp">Authenticate with a Time-Based One-Time Password (TOTP)</a></h3>
+        <p class="" style="">
+			Time-Based One-Time Password (TOTP) algorithm described in 
+			<span class="ref">RFC 6238</span> is an extension of the HMAC-based 
+			One-Time Password (HOTP) algorithm defined in <span class="ref">RFC 4226</span>, 
+			to support the time-based moving factor. In TOTP, time 
+			reference and a time step replaces the counter in the HOTP 
+			computation.
+		</p>
+		<p class="caption"><a name="example-1" id="example-1"></a>Example 1. Local Client (Prover) requests to authenticate with a TOTP to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/chamber'
+    to='juliet@example.com/balcony'
+    type='set'
+    id='set-totp-1'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands' 
+           action='execute'
+           node='http://jabber.org/protocol/auth#set-totp'/&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="" style="">Unless an error occurs (see the 
+        <a href="#errors">Error Handling</a> section below), the service 
+        SHOULD return the appropriate form.</p>
+        
+        <p class="caption"><a name="example-2" id="example-2"></a>Example 2. Remote Client (Verifier) replies with a form to set a TOTP</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/balcony' 
+    to='juliet@example.com/chamber' 
+    type='result' 
+    id='set-totp-1'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands'
+           node='http://jabber.org/protocol/auth#set-totp'
+           sessionid='set-totp:20131020T1320Z'
+           status='executing'&gt;
+    &lt;actions&gt;
+	  &lt;complete /&gt;
+    &lt;/actions&gt;
+    &lt;x xmlns='jabber:x:data' type='form'&gt;
+      &lt;title&gt;Time-Based One-Time Password&lt;/title&gt;
+      &lt;instructions&gt;Send a Time-Based One-Time Password&lt;/instructions&gt;
+      &lt;field type='text-single'
+             var='totp'&gt;
+             label='TOTP'&gt;
+      &lt;/field&gt;
+    &lt;/x&gt;
+  &lt;/command&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="caption"><a name="example-3" id="example-3"></a>Example 3. Local Client (Prover) submits the TOTP secret form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/chamber'
+    to='juliet@example.com/balcony'
+    type='set'
+    id='set-totp-2'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands' 
+           node='http://jabber.org/protocol/auth#set-totp'
+           sessionid='set-status:20131020T1320Z'&gt;
+    &lt;x xmlns='jabber:x:data' type='submit'&gt;
+      &lt;field var='totp'&gt;
+        &lt;value&gt;218418045&lt;/value&gt;
+      &lt;/field&gt;
+    &lt;/x&gt;
+  &lt;/command&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="" style="">After receiving a correct secret, the Verifier informs Prover of completion.</p>
+        <p class="caption"><a name="example-4" id="example-4"></a>Example 4. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/balcony' 
+    to='juliet@example.com/chamber' 
+    type='result' 
+    id='set-totp-2'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands'
+           node='http://jabber.org/protocol/auth#set-totp'
+           sessionid='set-status:20131020T1320Z'
+           status='completed'/&gt;
+&lt;/iq&gt;
+        </pre></div>
+    </div>
+    
+     
+        <div class="indent"><h3>5.2 <a name="set-otpad" id="set-otpad">Authenticate with a one-time pad</a></h3>
+        <p class="" style="">
+			As described in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc4949">RFC 4949</a></span>  [<a href="#nt-idp26423216">10</a>] one-time pad is an encryption 
+			algorithm in which the key is a random sequence of symbols 
+			and each symbol is used for encryption only one time,
+			i.e., used to encrypt only one plaintext symbol and thus 
+			produce only one ciphertext symbol and thus produce only one 
+			ciphertext symbol. A copy of the key is used similarly 
+			for decryption.
+		</p>
+		<p class="caption"><a name="example-5" id="example-5"></a>Example 5. Local Client (Prover) requests to authenticate with a one-time pad to a Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/chamber'
+    to='juliet@example.com/balcony'
+    type='set'
+    id='set-otpad-1'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands' 
+           action='execute'
+           node='http://jabber.org/protocol/auth#set-otpad'/&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="" style="">Unless an error occurs (see the 
+        <a href="#errors">Error Handling</a> section below), the service 
+        SHOULD return the appropriate form.</p>
+        
+   
+        <p class="caption"><a name="example-6" id="example-6"></a>Example 6. Remote Client (Verifier) replies with a form to set a one-time pad</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/balcony' 
+    to='juliet@example.com/chamber' 
+    type='result' 
+    id='set-otpad-1'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands'
+           node='http://jabber.org/protocol/auth#set-otpad'
+           sessionid='set-totp:20131125T1022Z'
+           status='executing'&gt;
+    &lt;actions&gt;
+	  &lt;complete /&gt;
+    &lt;/actions&gt;
+    &lt;x xmlns='jabber:x:data' type='form'&gt;
+      &lt;title&gt;One-time pad&lt;/title&gt;
+      &lt;instructions&gt;Send a one-time pad&lt;/instructions&gt;
+      &lt;field type='text-single'
+             var='otpad'&gt;
+             label='OTPAD'&gt;
+      &lt;/field&gt;
+    &lt;/x&gt;
+  &lt;/command&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="caption"><a name="example-7" id="example-7"></a>Example 7. Local Client (Prover) submits the one-time pad form to Remote Client (Verifier)</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/chamber'
+    to='juliet@example.com/balcony'
+    type='set'
+    id='set-otpad-2'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands' 
+           node='http://jabber.org/protocol/auth#set-otpad'
+           sessionid='set-status:20131125T1022Z'&gt;
+    &lt;x xmlns='jabber:x:data' type='submit'&gt;
+      &lt;field var='totp'&gt;
+        &lt;value&gt;umeet321oop&lt;/value&gt; &lt;!-- TODO: VAIHDA --&gt;
+      &lt;/field&gt;
+    &lt;/x&gt;
+  &lt;/command&gt;
+&lt;/iq&gt;
+        </pre></div>
+        <p class="" style="">After receiving a one-time pad, the Verifier informs Prover of completion.</p>
+        <p class="caption"><a name="example-8" id="example-8"></a>Example 8. Remote Client (Verifier) informs Local Client (Prover) of completion</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='juliet@example.com/balcony' 
+    to='juliet@example.com/chamber' 
+    type='result' 
+    id='set-otpad-2'
+    xml:lang='en'&gt;
+  &lt;command xmlns='http://jabber.org/protocol/commands'
+           node='http://jabber.org/protocol/auth#set-otpad'
+           sessionid='set-status:20131125T1022Z'
+           status='completed'/&gt;
+&lt;/iq&gt;
+        </pre></div>
+        </div>
+    
+<h2>6.
+       <a name="errors" id="errors">Error Handling</a></h2> 
+    <p class="" style="">
+		Several error conditions are possible when a Prover sends a 
+		command	request to the Verifier, as defined in the following 
+		table. If one of these errors occurs, the Verifier entity MUST 
+		return an error stanza to the requesting Prover.
+	</p>
+
+    <div class="indent"><p class="caption"><a name="table-1" id="table-1"></a>Table 1: Error Conditions</p><table border="1" cellpadding="3" cellspacing="0">
+        <tr class="body">
+            <th colspan="" rowspan="">Condition</th>
+            <th colspan="" rowspan="">Cause</th>
+        </tr>
+        
+        <tr class="body">
+            <td colspan="" rowspan="">&lt;feature-not-implemented/&gt;</td>
+            <td colspan="" rowspan="">The specific command is not supported (even though the 
+            ad-hoc commands protocol is).</td>
+        </tr>
+        <tr class="body">
+            <td colspan="" rowspan="">&lt;forbidden/&gt;</td>
+            <td colspan="" rowspan="">The requesting entity does not have sufficient 
+            privileges to perform the command.</td>
+        </tr>
+        <tr class="body">
+            <td colspan="" rowspan="">&lt;service-unavailable/&gt;</td>
+            <td colspan="" rowspan="">The ad-hoc commands protocol is not supported.</td>
+        </tr>
+        <tr class="body">
+            <td colspan="" rowspan="">&lt;payment-required/&gt;</td>
+            <td colspan="" rowspan="">If the user needs to provide payment in order to access 
+            to resources behind the Verifier (e.g., if the user is not 
+            in the customer database or the customer's account is not 
+            paid up).</td>
+        </tr>        
+    </table></div>
+      
+    <p class="" style="">For the syntax of these errors, see <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0086.html">Error Condition Mappings (XEP-0086)</a></span>  [<a href="#nt-idp26450128">11</a>]. Naturally, other 
+    errors may be returned as well.</p>
+<h2>7.
+       <a name="impl" id="impl">Implementation Notes</a></h2>
+	<p class="" style="">
+		Implementations of this protocol MAY introduce extra forms for 
+		commands and MAY use other secret key generation mechanisms than 
+		currently presented TOTP and one-time pad. 
+	</p>
+	<p class="" style="">
+		There are several secure ways to transmit one-time pads or the 
+		shared secret that is used in TOTP from Verifier to the Prover. 
+		If both Verifier and Prover entities are running in one 
+		application inside one device, the shared secret can be 
+		generated and transmitted inside running implementation and 
+		be removed right after the usage.
+	</p>
+  <h2>8.
+       <a name="rules" id="rules">Business Rules</a></h2>
+	<p class="" style="">Presented authentication mechanism offers possibilities to 
+	execute at least the following access policies and different
+	combinations of them, but their detailed descriptions and how 
+	policies are transmitted to the Verifier are out of scope of 
+	this document:</p>
+	<ul class="" style="">
+		<li class="" style="">
+			The policy MAY allow only anonymous XMPP accounts, only 
+			non-anonymous XMPP accounts, or both, to be verified and/or 
+			to access certain resources.
+			
+			No additional access control mechanisms are necessarily 
+			needed. 
+		</li>
+		<li class="" style="">
+			The policy MAY allow, e.g., only JIDs in certain domains, 
+			JIDs in a certain whitelist, JIDs in certain roster 
+			group(s), or JIDs with certain subscription types to be 
+			verified and/or to access certain resources. Additional 
+			mechanisms are required, e.g., to check wanted roster.
+		</li>
+	</ul>
+	
+	In each case, the Verifier MAY check Prover's JID right after 
+	receiving the first Ad-Hoc command or after a succesful	verification 
+	process. 
+	
+	If Prover's JID is not approved, the Verifier SHOULD 
+	reply with &lt;forbidden/&gt; error message.
+	
+	After the a succesful verification the Verifier can, e.g.,
+	<ul class="" style="">
+				<li class="" style="">start the wanted process,</li>
+				<li class="" style="">ask access rights from additional provision servers, 
+				e.g. with <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0324.html">Internet of Things - Provisioning (XEP-0324)</a></span>  [<a href="#nt-idp26467968">12</a>], and/or</li>
+				<li class="" style="">give access to the wanted resource.</li>
+			</ul>
+	<h2>9.
+       <a name="security" id="security">Security Considerations</a></h2>
+	<p class="" style="">
+		Mechanisms for determining when a command can be executed based 
+		on permissions or rights are considered specific to the 
+		application and/or implementation of <span class="ref">XEP-0050</span>, as
+		defined in <span class="ref">XEP-0050</span>.
+		
+		In this application a command SHOULD be executed if and only 
+		if it comes from full user's JID that is already known to 
+		the Verifier. This decreases possibility to execute, e.g, 
+		relay attacks.
+		
+		Determining other permissions or rights are considered specific
+		to access policies of systems, as presented in 
+		<a href="#rules">Business Rules</a> section.
+	</p>
+	<p class="" style="">
+		Possibility of executing Denial-of-service (DoS) attacks against 
+		the Verifier can be reduced by ending processing of received 
+		messages coming from not authorized JIDs or containing incorrect
+		secret as early as possible.
+	</p>
+	<p class="" style="">
+		Randomness requirements for security described in 
+		<span class="ref">RFC 4086</span> apply.
+	</p>
+	<p class="" style="">
+		When using TOTP, security considerations of 
+		<span class="ref">RFC 6238</span> apply.
+	</p>
+	<p class="" style="">
+		When using TOTP, HMAC-SHA-256 or HMAC-SHA-512 functions SHOULD 
+		be used instead of the HMAC-SHA-1 that has been specified for 
+		the HOTP computation in <span class="ref">RFC 4226</span>.
+	</p>
+	<p class="" style="">
+		When using TOTP, when an OTP is generated at the end of a 
+		time-step window, the receiving time most likely falls into the 
+		next time-step window. A validation system MUST set a policy 
+		for an acceptable OTP transmission delay window for validation. 
+		A larger acceptable delay window would expose a larger window 
+		for attacks, so as in <span class="ref">RFC 6238</span>, we RECOMMEND that 
+		at most one time step is allowed as the network delay.
+	</p>
+	<p class="" style="">
+		As described in <a href="#intro">Introduction</a>, the 
+		user of the Prover XMPP client does not necessarily know 
+		anything about the Verifier. In addition to this, the user 
+		does not necessarily know what the device or the application 
+		will do after a succesful authentication. Notice that this 
+		problem relates to every closed source XMPP client 
+		implementations, thus implementations' code SHOULD be open 
+		source.
+	</p>
+	<p class="" style="">
+		When using one-time pads, to ensure one-time use, the copy of 
+		the key used for encryption MUST be destroyed after use, as 
+		is the copy used for decryption.
+	</p>
+	<p class="" style="">
+		When using one-time pads, commands containing pads that have 
+		incorrect pad length, SHOULD not be executed. 
+	</p>
+
+<h2>10.
+       <a name="iana" id="iana">IANA Considerations</a></h2>
+	<p class="" style="">
+		This document requires no interaction with the <span class="ref" style=""><a href="http://www.iana.org/">Internet Assigned Numbers Authority (IANA)</a></span>  [<a href="#nt-idp26490432">13</a>].
+	</p>
+<h2>11.
+       <a name="registrar" id="registrar">XMPP Registrar Considerations</a></h2>
+    
+    <div class="indent"><h3>11.1 <a name="registrar-protocol" id="registrar-protocol">Protocol Namespaces</a></h3>
+        <p class="" style="">The XMPP Registrar includes 'http://jabber.org/protocol/auth' 
+        in its registry of protocol namespaces (see &lt;<a href="http://xmpp.org/registrar/namespaces.html">http://xmpp.org/registrar/namespaces.html</a>&gt;).</p>
+    </div>
+
+    <div class="indent"><h3>11.2 <a name="registrar-formtype" id="registrar-formtype">Field Standardization</a></h3>
+        <p class="" style=""><span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0068.html">Field Standardization for Data Forms (XEP-0068)</a></span>  [<a href="#nt-idp26502064">14</a>] defines a process for standardizing the fields used 
+        within Data Forms scoped by a particular namespace 
+        (see also &lt;<a href="http://xmpp.org/registrar/formtypes.html">http://xmpp.org/registrar/formtypes.html</a>&gt;). The reserved fields for the 
+        'http://jabber.org/protocol/auth' namespace are specified 
+        below.</p>
+        <p class="caption">Registry Submission</p><div class="indent"><pre class="prettyprint">
+&lt;form_type&gt;
+  &lt;name&gt;http://jabber.org/protocol/auth&lt;/name&gt;
+  &lt;doc&gt;XEP-XXXX&lt;/doc&gt;
+  &lt;desc&gt;Forms used for authenticating clients&lt;/desc&gt;
+  &lt;field var='set-totp'
+         type='text-single'
+         label='Time-Based One-Time Password'/&gt;
+  &lt;field var='set-otpad'
+         type='text-single'
+         label='One-time pad'/&gt;
+&lt;/form_type&gt;
+    </pre></div>
+  </div>
+<h2>12.
+       <a name="schema" id="schema">XML Schema</a></h2>
+	<p class="" style="">
+		Because the protocol defined here is a profile of 
+		<span class="ref">XEP-0050</span>, no schema definition is needed.
+	</p>
+<hr /><a name="appendices" id="appendices"></a><h2>Appendices</h2><hr /><a name="appendix-docinfo" id="appendix-docinfo"></a><h3>Appendix A: Document Information</h3><p class="indent">
+            Series: <a href="http://xmpp.org/extensions/">XEP</a><br />
+            Number: xxxx<br />
+            Publisher: <a href="/xsf/">XMPP Standards Foundation</a><br />
+            Status: 
+            <a href="http://xmpp.org/extensions/xep-0001.html#states-ProtoXEP">ProtoXEP</a><br />
+            Type:
+            <a href="http://xmpp.org/extensions/xep-0001.html#types-Informational">Informational</a><br />
+            Version: DRAFT OF 0.0.1<br />
+            Last Updated: 2013-12-19<br />
+                Approving Body: <a href="http://xmpp.org/council/">XMPP Council</a><br />Dependencies: XMPP Core, XEP-0050<br />
+                Supersedes: None<br />
+                Superseded By: None<br />
+            Short Name: NOT_YET_ASSIGNED<br />
+            This document in other formats: 
+                <a class="standardsButton" href="http://xmpp.org/extensions/xep-xxxx.xml">XML</a> 
+                <a class="standardsButton" href="http://xmpp.org/extensions/xep-xxxx.pdf">PDF</a></p><hr /><a name="appendix-authorinfo" id="appendix-authorinfo"></a><h3>Appendix B: Author Information</h3><div class="indent"><h3>Teemu Väisänen</h3><p class="indent">
+        Email:
+        <a href="mailto:Teemu.Vaisanen@vtt.fi">Teemu.Vaisanen@vtt.fi</a><br />
+        JabberID: 
+        <a href="xmpp:uolevi@gmail.com">uolevi@gmail.com</a><br /></p></div><hr /><a name="appendix-legal" id="appendix-legal"></a><h3>Appendix C: Legal Notices</h3><div class="indent"><h4>Copyright</h4>This XMPP Extension Protocol is copyright (c) 1999 - 2013 by the XMPP Standards Foundation (XSF).<h4>Permissions</h4>Permission is hereby granted, free of charge, to any person obtaining a copy of this specification (the "Specification"), to make use of the Specification without restriction, including without limitation the rights to implement the Specification in a software program, deploy the Specification in a network service, and copy, modify, merge, publish, translate, distribute, sublicense, or sell copies of the Specification, and to permit persons to whom the Specification is furnished to do so, subject to the condition that the foregoing copyright notice and this permission notice shall be included in all copies or substantial portions of the Specification. Unless separate permission is granted, modified works that are redistributed shall not contain misleading information regarding the authors, title, number, or publisher of the Specification, and shall not claim endorsement of the modified works by the authors, any organization or project to which the authors belong, or the XMPP Standards Foundation.<h4>Disclaimer of Warranty</h4><span style="font-weight: bold">## NOTE WELL: This Specification is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. In no event shall the XMPP Standards Foundation or the authors of this Specification be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Specification or the implementation, deployment, or other use of the Specification. ##</span><h4>Limitation of Liability</h4>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall the XMPP Standards Foundation or any author of this Specification be liable for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising out of the use or inability to use the Specification (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if the XMPP Standards Foundation or such author has been advised of the possibility of such damages.<h4>IPR Conformance</h4>This XMPP Extension Protocol has been contributed in full conformance with the XSF's Intellectual Property Rights Policy (a copy of which may be found at &lt;<a href="http://www.xmpp.org/extensions/ipr-policy.shtml">http://www.xmpp.org/extensions/ipr-policy.shtml</a>&gt; or obtained by writing to XSF, P.O. Box 1641, Denver, CO 80201 USA).</div><hr /><a name="appendix-xmpp" id="appendix-xmpp"></a><h3>Appendix D: Relation to XMPP</h3><p class="indent">The Extensible Messaging and Presence Protocol (XMPP) is defined in the XMPP Core (RFC 6120) and XMPP IM (RFC 6121) specifications contributed by the XMPP Standards Foundation to the Internet Standards Process, which is managed by the Internet Engineering Task Force in accordance with RFC 2026. Any protocol defined in this document has been developed outside the Internet Standards Process and is to be understood as an extension to XMPP rather than as an evolution, development, or modification of XMPP itself.</p><hr /><a name="appendix-discuss" id="appendix-discuss"></a><h3>Appendix E: Discussion Venue</h3><p class="indent">The primary venue for discussion of XMPP Extension Protocols is the &lt;<a href="http://mail.jabber.org/mailman/listinfo/standards">standards@xmpp.org</a>&gt; discussion list.</p><p class="indent">Discussion on other xmpp.org discussion lists might also be appropriate; see &lt;<a href="http://xmpp.org/about/discuss.shtml">http://xmpp.org/about/discuss.shtml</a>&gt; for a complete list.</p><p class="indent">Errata can be sent to &lt;<a href="mailto:editor@xmpp.org">editor@xmpp.org</a>&gt;.</p><hr /><a name="appendix-conformance" id="appendix-conformance"></a><h3>Appendix F: Requirements Conformance</h3><p class="indent">The following requirements keywords as used in this document are to be interpreted as described in <a href="http://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>: "MUST", "SHALL", "REQUIRED"; "MUST NOT", "SHALL NOT"; "SHOULD", "RECOMMENDED"; "SHOULD NOT", "NOT RECOMMENDED"; "MAY", "OPTIONAL".</p><hr /><a name="appendix-notes" id="appendix-notes"></a><h3>Appendix G: Notes</h3><div class="indent"><p><a name="nt-idp25403200" id="nt-idp25403200">1</a>. XEP-0175: Best Practices for Use of SASL ANONYMOUS &lt;<a href="http://xmpp.org/extensions/xep-0175.html">http://xmpp.org/extensions/xep-0175.html</a>&gt;.</p><p><a name="nt-idp25410784" id="nt-idp25410784">2</a>. RFC 6238: TOTP: Time-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc6238">http://tools.ietf.org/html/rfc6238</a>&gt;.</p><p><a name="nt-idp25415920" id="nt-idp25415920">3</a>. XEP-0146: Remote Controlling Clients &lt;<a href="http://xmpp.org/extensions/xep-0146.html">http://xmpp.org/extensions/xep-0146.html</a>&gt;.</p><p><a name="nt-idp26343952" id="nt-idp26343952">4</a>. XEP-0250: C2C Authentication Using TLS &lt;<a href="http://xmpp.org/extensions/xep-0250.html">http://xmpp.org/extensions/xep-0250.html</a>&gt;.</p><p><a name="nt-idp26348640" id="nt-idp26348640">5</a>. XEP-0050: Ad-Hoc Commands &lt;<a href="http://xmpp.org/extensions/xep-0050.html">http://xmpp.org/extensions/xep-0050.html</a>&gt;.</p><p><a name="nt-idp26361344" id="nt-idp26361344">6</a>. XEP-0030: Service Discovery &lt;<a href="http://xmpp.org/extensions/xep-0030.html">http://xmpp.org/extensions/xep-0030.html</a>&gt;.</p><p><a name="nt-idp26371520" id="nt-idp26371520">7</a>. XEP-0115: Entity Capabilities &lt;<a href="http://xmpp.org/extensions/xep-0115.html">http://xmpp.org/extensions/xep-0115.html</a>&gt;.</p><p><a name="nt-idp26392736" id="nt-idp26392736">8</a>. RFC 4226: HOTP: An HMAC-Based One-Time Password Algorithm &lt;<a href="http://tools.ietf.org/html/rfc4226">http://tools.ietf.org/html/rfc4226</a>&gt;.</p><p><a name="nt-idp26402432" id="nt-idp26402432">9</a>. RFC 4086: Randomness Requirements for Security &lt;<a href="http://tools.ietf.org/html/rfc4086">http://tools.ietf.org/html/rfc4086</a>&gt;.</p><p><a name="nt-idp26423216" id="nt-idp26423216">10</a>. RFC 4949: Internet Security Glossary, Version 2 &lt;<a href="http://tools.ietf.org/html/rfc4949">http://tools.ietf.org/html/rfc4949</a>&gt;.</p><p><a name="nt-idp26450128" id="nt-idp26450128">11</a>. XEP-0086: Error Condition Mappings &lt;<a href="http://xmpp.org/extensions/xep-0086.html">http://xmpp.org/extensions/xep-0086.html</a>&gt;.</p><p><a name="nt-idp26467968" id="nt-idp26467968">12</a>. XEP-0324: Internet of Things - Provisioning &lt;<a href="http://xmpp.org/extensions/xep-0324.html">http://xmpp.org/extensions/xep-0324.html</a>&gt;.</p><p><a name="nt-idp26490432" id="nt-idp26490432">13</a>. The Internet Assigned Numbers Authority (IANA) is the central coordinator for the assignment of unique parameter values for Internet protocols, such as port numbers and URI schemes. For further information, see &lt;<a href="http://www.iana.org/">http://www.iana.org/</a>&gt;.</p><p><a name="nt-idp26502064" id="nt-idp26502064">14</a>. XEP-0068: Field Data Standardization for Data Forms &lt;<a href="http://xmpp.org/extensions/xep-0068.html">http://xmpp.org/extensions/xep-0068.html</a>&gt;.</p></div><hr /><a name="appendix-revs" id="appendix-revs"></a><h3>Appendix H: Revision History</h3><p>Note: Older versions of this specification might be available at <a href="http://xmpp.org/extensions/attic/">http://xmpp.org/extensions/attic/</a></p><div class="indent"><h4>Version DRAFT OF 0.0.1 (2013-12-19)</h4><div class="indent"><p class="" style="">First draft.</p> (tuv)
+    </div></div><hr /><p>END</p></body></html>
